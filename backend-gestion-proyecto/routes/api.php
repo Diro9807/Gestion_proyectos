@@ -11,5 +11,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::get('/rol', [RolController::class, 'index']);
-Route::apiResource('projects', ProjectController::class);
 
+Route::post('/projects', [ProjectController::class, 'store']);
+Route::get('/projects', [ProjectController::class, 'index']);
+
+Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);

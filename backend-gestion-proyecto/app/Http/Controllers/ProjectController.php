@@ -10,20 +10,17 @@ class ProjectController extends Controller
 {
     public function index()
     {
-        return Project::all();
+        return Project::with(['users', 'tasks'])->get();
     }
 
     public function store(Request $request)
     {
-        return Project::create([
-            'name' => $request->name,
-            'user_id' => 1
-        ]);
+        return Project::create($request->all());
     }
 
     public function destroy(Project $project)
     {
         $project->delete();
-        return response()->noContent();
+        return response()->json(['message' => 'Proyecto eliminado']);
     }
 }

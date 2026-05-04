@@ -2,26 +2,34 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class User extends Model
 {
-    use HasFactory, Notifiable;
-
     protected $table = 'users';
-    //protected $primaryKey = 'id_user';
-    //public $timestamps = false;
+    protected $primaryKey = 'id_user';
+    public $timestamps = false;
 
-    //public function rol(){
-        //return $this->belongsTo(Rol::class, 'roles_id');
-    //}
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'roles_id',
+        'project_id'
+    ];
 
-    public function projects(){
+    public function role()
+    {
+        return $this->belongsTo(Rol::class, 'roles_id', 'id_rol');
+    }
 
-        return $this->hasMany(Project::class);
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id', 'id_project');
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'user_id', 'id_user');
     }
 }
