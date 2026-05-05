@@ -25,4 +25,6 @@ class Task extends Model
     {
         return $this->belongsTo(Project::class, 'project_task_id', 'id_project');
     }
+
+
 }

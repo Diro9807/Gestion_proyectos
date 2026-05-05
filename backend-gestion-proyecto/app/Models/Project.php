@@ -10,6 +10,9 @@ class Project extends Model
     protected $primaryKey = 'id_project';
     public $timestamps = false;
 
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     protected $fillable = ['name', 'description'];
 
     public function users()

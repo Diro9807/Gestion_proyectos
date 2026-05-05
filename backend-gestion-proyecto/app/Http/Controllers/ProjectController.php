@@ -23,4 +23,14 @@ class ProjectController extends Controller
         $project->delete();
         return response()->json(['message' => 'Proyecto eliminado']);
     }
+
+    public function update(Request $request, Project $project)
+{
+        $project->update([
+            'name' => $request->name,
+            'description' => $request->description
+        ]);
+
+    return response()->json($project);
+}
 }
