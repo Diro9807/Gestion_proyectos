@@ -1,73 +1,94 @@
 <template>
   <div class="Projects-content">
-    <h1>Mis Proyectos</h1>
+    
+    <div v-if="!selectedProject">
 
-    <input v-model="name" placeholder="Nuevo proyecto" />
-    <input v-model="description" placeholder="Descripción del proyecto" />
-    <button @click="createProject">Crear</button>
+      <h1>Mis Proyectos</h1>
 
-    <ul>
-      <li v-for="p in projects" :key="p.id_project">
+      <input v-model="name" placeholder="Nuevo proyecto" />
+      <input v-model="description" placeholder="Descripción del proyecto" />
+      <button @click="createProject">Crear</button>
 
-      <!-- PROYECTO -->
-      <div v-if="editingId !== p.id_project">
+      <ul>
+        <li 
+          v-for="p in projects" 
+          :key="p.id_project"
+          @click="$router.push(`/projects/${p.id_project}`)"
+        >
 
-        <h2 class="project-title">{{ p.name }}</h2>
+          <!-- NORMAL -->
+          <div v-if="editingId !== p.id_project">
 
-        <p class="project-description">
-          {{ p.description || 'Sin descripción' }}
-        </p>
+            <h2 class="project-title">{{ p.name }}</h2>
 
-        <!-- 🔥 TASKS -->
-        <div class="tasks">
+            <p class="project-description">
+              {{ p.description || 'Sin descripción' }}
+            </p>
 
-          <!-- CREAR TASK -->
-          <div class="task-create">
-            <input v-model="newTask[p.id_project]" placeholder="Nueva tarea" />
-            <button @click="createTask(p.id_project)">+</button>
+            <!-- BOTONES -->
+            <button @click.stop="startEdit(p)">✏️</button>
+            <button @click.stop="deleteProject(p.id_project)">❌</button>
+
           </div>
 
-          <!-- LISTA TASKS -->
-          <ul class="task-list">
-            <li v-for="t in tasks[p.id_project]" :key="t.id_task">
+          <!-- EDITAR -->
+          <div v-else @click.stop>
+            <input v-model="editName" />
+            <input v-model="editDescription" />
 
-              <!-- NORMAL -->
-              <div v-if="editingTaskId !== t.id_task">
-                {{ t.name }}
+            <button @click="updateProject(p.id_project)">Guardar</button>
+            <button @click="cancelEdit">❌</button>
+          </div>
 
-                <button @click="startEditTask(t)">✏️</button>
-                <button @click="deleteTask(t.id_task, p.id_project)">❌</button>
-              </div>
+        </li>
+      </ul>
 
-              <!-- EDIT -->
-              <div v-else>
-                <input v-model="editTaskName" />
-                <button @click="updateTask(t.id_task, p.id_project)">Guardar</button>
-                <button @click="cancelEditTask">❌</button>
-              </div>
+    </div>
 
-            </li>
-          </ul>
+    <!-- 🔹 VISTA PROYECTO -->
+    <div v-else>
 
-        </div>
+      <button @click="closeProject">⬅ Volver</button>
 
-        <!-- BOTONES PROYECTO -->
-        <button @click="startEdit(p)">✏️</button>
-        <button @click="deleteProject(p.id_project)">❌</button>
+      <h1>{{ selectedProject.name }}</h1>
 
-      </div>
+      <!-- CREAR TASK -->
+      <input 
+        v-model="newTask[selectedProject.id_project]" 
+        placeholder="Nueva tarea" 
+      />
+      <button @click="createTask(selectedProject.id_project)">+</button>
 
-      <!-- EDITAR PROYECTO -->
-      <div v-else>
-        <input v-model="editName" />
-        <input v-model="editDescription" />
+      <!-- LISTA TASKS -->
+      <ul>
+        <li 
+          v-for="t in tasks[selectedProject.id_project]" 
+          :key="t.id_task"
+        >
 
-        <button @click="updateProject(p.id_project)">Guardar</button>
-        <button @click="cancelEdit">❌</button>
-      </div>
+          <!-- NORMAL -->
+          <div v-if="editingTaskId !== t.id_task">
+            {{ t.name }}
 
-    </li>
-    </ul>
+            <button @click="startEditTask(t)">✏️</button>
+            <button @click="deleteTask(t.id_task, selectedProject.id_project)">❌</button>
+          </div>
+
+          <!-- EDIT -->
+          <div v-else>
+            <input v-model="editTaskName" />
+
+            <button @click="updateTask(t.id_task, selectedProject.id_project)">
+              Guardar
+            </button>
+            <button @click="cancelEditTask">❌</button>
+          </div>
+
+        </li>
+      </ul>
+
+    </div>
+
   </div>
 </template>
 
@@ -81,7 +102,14 @@ export default {
       
       editingId: null,
       editName: '',
-      editDescription: ''
+      editDescription: '',
+
+      tasks: {},
+      newTask: {},
+      editingTaskId: null,
+      editTaskName: '',
+
+      selectedProject: null,
     }    
   },
 
@@ -90,6 +118,15 @@ export default {
   },
 
   methods: {
+    openProject(project) {
+      this.selectedProject = project
+      this.loadTasks(project.id_project)
+    },
+    closeProject() {
+      this.selectedProject = null
+    },
+
+    ///////////////////////
     async loadProjects() {
 
       console.log('Cargando proyectos...')
@@ -100,8 +137,12 @@ export default {
       })
 
       this.projects = await res.json()
+      
+        this.projects.forEach(p => {
+          this.loadTasks(p.id_project)
+        })
     },
-
+    ///////////////////////
     async createProject() {
       console.log('VALOR:', this.name)
       await fetch('http://127.0.0.1:8000/api/projects', {
@@ -117,8 +158,8 @@ export default {
       this.description = ''
       this.loadProjects()
     },
-
-   async deleteProject(id) {
+////////////////////////////////////////////////////////////////////////////////////////////
+    async deleteProject(id) {
       try {
         const response = await fetch(`http://127.0.0.1:8000/api/projects/${id}`, {
           method: 'DELETE',
@@ -152,7 +193,7 @@ export default {
       this.editName = ''
       this.editDescription = ''
     },
-
+////////////////////////////////////////////////////////////////////////////////////////////
     async updateProject(id) {      
       try {
         await fetch(`http://127.0.0.1:8000/api/projects/${id}`, {
@@ -175,6 +216,91 @@ export default {
         console.error('Error actualizando proyecto:', error)
       }
     },
+
+////////////////////////////////////////////////////////////////////////////////////////////  
+    async loadTasks(projectId) {
+
+      console.log('Cargando tareas...')
+        const res = await fetch(`http://127.0.0.1:8000/api/projects/${projectId}/tasks`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+        })
+
+      this.tasks[projectId] = await res.json()
+    },
+////////////////////////////////////////////////////////////////////////////////////////////
+    async createTask(projectId) {
+      console.log('VALOR TASK:', this.newTask[projectId])
+
+      await fetch('http://127.0.0.1:8000/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+        body: JSON.stringify({
+          name: this.newTask[projectId],
+          project_task_id: projectId
+        }),
+      })
+
+      this.newTask[projectId] = ''
+      this.loadTasks(projectId)
+    },
+////////////////////////////////////////////////////////////////////////////////////////////    
+    async deleteTask(id, projectId) {
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/tasks/${id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+            Accept: 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Error al eliminar la tarea');
+        }
+
+        console.log('Tarea eliminada correctamente');
+        this.loadTasks(projectId);
+
+      } catch (error) {
+        console.error('Error deleting task:', error.message);
+      }
+    },
+////////////////////////////////////////////////////////////////////////////////////////////  
+    startEditTask(task) {
+      this.editingTaskId = task.id_task
+      this.editTaskName = task.name
+    },
+    cancelEditTask() {
+      this.editingTaskId = null
+      this.editTaskName = ''
+    },
+////////////////////////////////////////////////////////////////////////////////////////////  
+    async updateTask(id, projectId) {      
+      try {
+        await fetch(`http://127.0.0.1:8000/api/tasks/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+          body: JSON.stringify({
+            name: this.editTaskName,
+          }),          
+        })       
+
+        this.editingTaskId = null
+        this.loadTasks(projectId)
+
+      } catch (error) {
+        console.error('Error actualizando tarea:', error)
+      }
+    }
   },
 }
 </script>

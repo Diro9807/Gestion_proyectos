@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Task;
 
 class TaskController extends Controller
 {
@@ -19,7 +20,7 @@ class TaskController extends Controller
         return Task::create([
             'name' => $request->name,
             'project_task_id' => $request->project_task_id,
-            'user_id' => 1 // luego lo haremos dinámico
+            'user_id' => auth()->id()
         ]);
     }
 
