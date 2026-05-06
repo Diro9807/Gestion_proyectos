@@ -20,7 +20,7 @@ export default {
 <style>
 .dashboard-content {  
   height: 150vh;
-  background: linear-gradient(135deg, #6d97d6, #07173f);
+    background: linear-gradient(160deg, #6d97d6, #07173f);
   color: white;
   border-radius: 5px;
 }

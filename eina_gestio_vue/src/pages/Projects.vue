@@ -308,7 +308,7 @@ export default {
 <style scoped>
 /* CONTENEDOR GENERAL */
 .Projects-content {
-  background-color: #6d97d6;
+    background: linear-gradient(160deg, #6d97d6, #07173f);
   min-height: 100vh;
 }
 

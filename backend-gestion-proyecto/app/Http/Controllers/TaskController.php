@@ -19,8 +19,13 @@ class TaskController extends Controller
     {
         return Task::create([
             'name' => $request->name,
+            'description' => $request->description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'due_date' => $request->due_date,
+            'status' => $request->status ?? 'pending',
             'project_task_id' => $request->project_task_id,
-            'user_id' => auth()->id()
+            'user_id' => 1
         ]);
     }
 
@@ -28,10 +33,15 @@ class TaskController extends Controller
     public function update(Request $request, Task $task)
     {
         $task->update([
-            'name' => $request->name
+            'name' => $request->name,
+            'description' => $request->description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'due_date' => $request->due_date,
+            'status' => $request->status
         ]);
 
-        return $task;
+        return response()->json($task);
     }
 
     // 🔹 Eliminar
