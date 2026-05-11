@@ -27,7 +27,7 @@
 
         <div class="col-status">Estado</div>
 
-        <div class="col-actions">Acciones</div>
+        
 
       </div>
       <ul>
@@ -166,6 +166,11 @@ export default {
 
     ///////////////////////
     async deleteTask(id) {
+      const confirmed = confirm(
+          '¿Seguro que quieres eliminar esta tarea?'
+        )
+
+        if (!confirmed) return
       try {
 
         await fetch(`http://127.0.0.1:8000/api/tasks/${id}`, {

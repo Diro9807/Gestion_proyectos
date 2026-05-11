@@ -25,3 +25,8 @@ Route::get('/projects/{id}/tasks', [TaskController::class, 'index']);
 Route::post('/tasks', [TaskController::class, 'store']);
 Route::put('/tasks/{task}', [TaskController::class, 'update']);
 Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
+
+// USUARIOS PROYECTOS
+Route::post('/projects/{project}/users', [ProjectController::class, 'addUser']);
+Route::delete('/projects/{project}/users/{user}', [ProjectController::class, 'removeUser']);
+Route::get('/users', [AuthController::class, 'index']);
