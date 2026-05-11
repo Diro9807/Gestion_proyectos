@@ -8,14 +8,17 @@ class Project extends Model
 {
     protected $table = 'projects';
     protected $primaryKey = 'id_project';
-    public $timestamps = false;
+    public $timestamps = true;
+
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = ['name', 'description'];
 
     public function users()
-    {
-        return $this->hasMany(User::class, 'project_id', 'id_project');
-    }
+{
+    return $this->belongsToMany(User::class,'project_users','project_id','user_id','id_project','id_user')->withPivot('role');
+}
 
     public function tasks()
     {

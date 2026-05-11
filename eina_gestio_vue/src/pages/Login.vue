@@ -76,6 +76,7 @@ export default {
         })
 
         const data = await response.json()
+        console.log('DATA COMPLETA:', data)
 
         if (!response.ok) {
           throw new Error(data.message || 'Error en el login')
@@ -84,8 +85,7 @@ export default {
         localStorage.setItem('auth_token', data.access_token)
         localStorage.setItem('auth_user', JSON.stringify(data.user))
         
-        this.$router.push('/dashboard')
-        window.location.reload()
+        this.$router.push('/projects')
 
       } catch (error) {
         this.error = error.message || 'Error de conexión'
