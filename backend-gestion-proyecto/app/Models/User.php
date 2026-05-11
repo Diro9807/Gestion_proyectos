@@ -3,14 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Model
+class User extends Authenticatable
 {
+
+    use HasApiTokens;
+
     protected $table = 'users';
 
     protected $primaryKey = 'id_user';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'name',

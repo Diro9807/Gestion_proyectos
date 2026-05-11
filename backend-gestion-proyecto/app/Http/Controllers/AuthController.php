@@ -27,12 +27,15 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->first();
 
-            if(!$user){
-                return response()->json(['message' => 'Usuario no encontrado'], 404);
+            $token = $user ? $user->createToken('auth_token')->plainTextToken : null;
+
+            if(!$user || !Hash::check($request->password, $user->password)) {
+                return response()->json(['message' => 'Credenciales inválidas'], 401);
             }
 
             return response()->json([
                 'message' => 'Has iniciado sesión',
+                'access_token' => $token,
                 'user' => $user
             ]);
     }

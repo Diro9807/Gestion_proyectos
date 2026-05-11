@@ -25,7 +25,7 @@ class TaskController extends Controller
             'due_date' => $request->due_date,
             'status' => $request->status ?? 'pending',
             'project_task_id' => $request->project_task_id,
-            'user_id' => 1
+            'user_id' => $request->user_id
         ]);
     }
 

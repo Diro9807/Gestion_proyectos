@@ -29,6 +29,7 @@ class ProjectController extends Controller
         ]);
         return response()->json($project);
     }
+
     public function addUser(Request $request, Project $project){
         $user = User::find($request->user_id);
 

@@ -273,6 +273,13 @@ export default {
     async loadProjects() {
 
       console.log('Cargando proyectos...')
+      const token = localStorage.getItem('auth_token')
+      if (!token) {
+        console.log("No hay auth token")
+        console.error('No auth token found')
+        this.$router.push('/login')
+        return
+      }
       const res = await fetch('http://127.0.0.1:8000/api/projects', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
@@ -306,8 +313,13 @@ export default {
               name: this.name,
               description: this.description,
             }),
+           
           }
         )
+         console.log('BODY ENVIADO:', {
+              name: this.name,
+              description: this.description,
+            })
 
         if (!res.ok) {
           const errorText = await res.text()
@@ -315,7 +327,7 @@ export default {
           throw new Error('Error creando proyecto')
         }
 
-        const project = await res.json()
+        const project = await res.json();
 
         console.log(project)
 
