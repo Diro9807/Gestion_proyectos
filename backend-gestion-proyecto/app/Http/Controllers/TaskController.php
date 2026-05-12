@@ -5,19 +5,52 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Models\Project;
+use Illuminate\Support\Facades\Auth;
 
-class TaskController extends Controller
-{
-    // 🔹 Obtener tareas por proyecto
-    public function index($projectId)
-    {
-        return Task::where('project_task_id', $projectId)->get();
+class TaskController extends Controller{
+
+    // Comprobación del usuario en el proyecto
+    private function userBelongsToProject(Project $project){
+            $user = Auth::user();
+
+            return $project->users()
+                ->where('users.id_user', $user->id_user)
+                ->exists();
+        }
+
+    //  Obtener tareas por proyecto
+    public function index(Project $project){
+
+        if (!$this->userBelongsToProject($project)) {
+
+            return response()->json([
+                'message' => 'No autorizado'
+            ], 403);
+        }
+
+        return $project->tasks;
     }
 
     // 🔹 Crear tarea
-    public function store(Request $request)
-    {
-        return Task::create([
+    public function store(Request $request){
+
+        $project = Project::find($request->project_task_id);
+
+        if (!$project) {
+            return response()->json([
+                'message' => 'Proyecto no encontrado'
+            ], 404);
+        }
+
+        if (!$this->userBelongsToProject($project)) {
+
+            return response()->json([
+                'message' => 'No autorizado'
+            ], 403);
+        }
+
+        $task = Task::create([
             'name' => $request->name,
             'description' => $request->description,
             'start_date' => $request->start_date,
@@ -27,11 +60,22 @@ class TaskController extends Controller
             'project_task_id' => $request->project_task_id,
             'user_id' => $request->user_id
         ]);
+
+        return response()->json($task);
     }
 
     // 🔹 Actualizar
-    public function update(Request $request, Task $task)
-    {
+    public function update(Request $request, Task $task){
+
+        $project = Project::find($task->project_task_id);
+
+        if (!$this->userBelongsToProject($project)) {
+
+            return response()->json([
+                'message' => 'No autorizado'
+            ], 403);
+        }
+
         $task->update([
             'name' => $request->name,
             'description' => $request->description,
@@ -45,9 +89,21 @@ class TaskController extends Controller
     }
 
     // 🔹 Eliminar
-    public function destroy(Task $task)
-    {
+    public function destroy(Task $task){
+
+        $project = Project::find($task->project_task_id);
+
+        if (!$this->userBelongsToProject($project)) {
+
+            return response()->json([
+                'message' => 'No autorizado'
+            ], 403);
+        }
+
         $task->delete();
-        return response()->json(['message' => 'Tarea eliminada']);
+
+        return response()->json([
+            'message' => 'Tarea eliminada'
+        ]);
     }
 }

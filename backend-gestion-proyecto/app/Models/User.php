@@ -29,11 +29,17 @@ class User extends Authenticatable
         return $this->belongsTo(Rol::class, 'roles_id', 'id_rol');
     }
 
-    public function projects()
-    {
-        return $this->belongsToMany(Project::class,'project_users','user_id','project_id','id_user','id_project')->withPivot('role');
-    }
+    public function projects(){
 
+        return $this->belongsToMany(
+            Project::class,
+            'project_users',
+            'user_id',
+            'project_id',
+            'id_user',
+            'id_project'
+        )->withPivot('role');
+    }
     public function tasks()
     {
         return $this->hasMany(Task::class, 'user_id', 'id_user');
