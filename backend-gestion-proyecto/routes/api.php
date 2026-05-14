@@ -22,12 +22,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // RUTAS ROLES
     Route::get('/rol', [RolController::class, 'index']);
+    Route::put('/projects/{project}/users/{user}/role', [ProjectController::class, 'changeRole']);
 
     // RUTAS PROYECTOS
     Route::post('/projects', [ProjectController::class, 'store']);
     Route::get('/projects', [ProjectController::class, 'index']);
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
     Route::put('/projects/{project}', [ProjectController::class, 'update']);
+    Route::get('/owned-projects', [ProjectController::class, 'ownedProjects']);
+    Route::get('/shared-projects', [ProjectController::class, 'sharedProjects']);
 
     // RUTAS USUARIOS PROYECTOS
     Route::post('/projects/{project}/users', [ProjectController::class, 'addUser']);

@@ -17,25 +17,44 @@
 
     </div>
 
-    <!-- LINKS -->
-    <div class="links">
+    <!-- LINKS -->    
+  <div class="links">
 
-      <!-- QUITADO DASHBOARD -->
-      <button
-        class="nav-btn"
-        @click="$router.push('/projects')"
-      >
-        Proyectos
-      </button>
+    <button
+      class="links-btn"
+      @click="$router.push('/projects')"
+    >
+      Mis proyectos
+    </button>
 
-      <button
-        class="logout-btn"
-        @click="logout"
-      >
-        Logout
-      </button>
+    <button
+      class="links-btn"
+      @click="$router.push('/shared-projects')"
+    >
+      Compartidos
+    </button>
+
+    <!-- USER TAG -->
+    <div class="navbar-user">
+
+      <div class="navbar-avatar">
+        {{ userInitial }}
+      </div>
+
+      <span class="navbar-username">
+        {{ userName }}
+      </span>
 
     </div>
+
+    <button
+      class="logout-btn"
+      @click="logout"
+    >
+      Logout
+    </button>
+
+  </div>
 
   </nav>
 </template>
@@ -44,7 +63,37 @@
 export default {
   name: 'NavbarComponent',
 
+  data() {
+    return {
+      user: null
+    }
+  },
+
+  mounted() {
+    this.loadUser()
+
+    window.addEventListener('storage', this.loadUser)
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('storage', this.loadUser)
+  },
+
+  computed: {
+    userName() {
+      return this.user?.name || 'Usuario'
+    },
+
+    userInitial() {
+      return this.userName.charAt(0).toUpperCase()
+    }
+  },
+
   methods: {
+    loadUser() {
+      this.user = JSON.parse(localStorage.getItem('auth_user'))
+    },
+
     logout() {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
@@ -55,6 +104,7 @@ export default {
     },
   },
 }
+
 </script>
 
 <style scoped>
@@ -121,7 +171,7 @@ export default {
 
 /* BOTONES */
 
-.nav-btn,
+.links-btn,
 .logout-btn {
   border: none;
 
@@ -140,12 +190,12 @@ export default {
 
 /* BOTÓN NORMAL */
 
-.nav-btn {
+.links-btn {
   background: #FE9F5B;
   color: white;
 }
 
-.nav-btn:hover {
+.links-btn:hover {
   background: #f1873c;
 
   transform: translateY(-2px);
@@ -188,6 +238,44 @@ export default {
     padding: 8px 12px;
     font-size: 13px;
   }
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: rgba(255,255,255,0.25);
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  font-family: Poppins;
+}
+
+.navbar-avatar {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: white;
+
+  font-weight: bold;
+
+  font-size: 14px;
+}
+
+.navbar-username {
+  font-weight: 600;
+  color: #374151;
 }
 
 </style>

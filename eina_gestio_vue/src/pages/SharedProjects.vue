@@ -5,14 +5,7 @@
 
       <div class="projects-header">
 
-        <h1>/MY-Projects</h1>
-
-        <button
-          class="create-project-btn"
-          @click="showCreateModal = true"
-        >
-          + Nuevo Proyecto
-        </button>
+        <h1>/Proyectos</h1>
 
       </div>
 
@@ -91,13 +84,13 @@
           <button class="close-sidebar" @click="closeSidebar">❌</button>
 
           <input
-            v-model="sidebarProject.name"
+            v-model="sidebarProject.name" disabled
             class="sidebar-title-input"
             @input="debouncedSaveProject"
           />
 
           <textarea
-            v-model="sidebarProject.description"
+            v-model="sidebarProject.description" disabled
             class="sidebar-description-input"
             placeholder="Añadir descripción..."
             @input="debouncedSaveProject"
@@ -121,6 +114,8 @@
 
               <option
                 v-for="u in users"
+                :key="u.id_user"
+                :value="u.id_user"
               >
                 {{ u.name }}
               </option>
@@ -150,7 +145,12 @@
                   
 
                   <div class="remove-user">
-                    <button class="remove-user-btn" @click="removeUserFromProject(u.id_user)">❌</button>
+                    <button
+                      class="remove-user-btn"
+                      @click.stop="removeUserFromProject(u.id_user)"
+                    >
+                      ❌
+                    </button>
                   </div>
 
                 </div>
@@ -200,6 +200,8 @@
 
               <option
                 v-for="u in users"
+                :key="u.id_user"
+                :value="u.id_user"
               >
                 {{ u.name }}
               </option>            
@@ -232,12 +234,11 @@
 
         </div>
       </div>
-    <!-- ERROR POPUP -->
+      <!-- ERROR POPUP -->
     <div v-if="showError" class="error-popup">
       {{ errorMessage }}
     </div>
-  </div>
-  
+  </div>  
 </template>
 
 <script>
@@ -248,7 +249,6 @@ export default {
       description: '',
       projects: [], 
 
-      currentUser: null,
       tasks: {},
       newTask: {},
       editingTaskId: null,
@@ -258,7 +258,7 @@ export default {
       sidebarProject: null,
       saveTimeout: null,
 
-      users: [],      
+      users: [],
       selectedUserId: '',
 
       showCreateModal: false,
@@ -267,13 +267,10 @@ export default {
       errorMessage: '',
       showError: false,
 
-
     }    
   },
 
   mounted() {
-    this.currentUser = JSON.parse(localStorage.getItem('user'))
-
     this.loadProjects()
     this.loadUsers()
   },
@@ -300,7 +297,7 @@ export default {
         this.$router.push('/login')
         return
       }
-      const res = await fetch('http://127.0.0.1:8000/api/owned-projects', {
+      const res = await fetch('http://127.0.0.1:8000/api/shared-projects', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -314,6 +311,11 @@ export default {
     },
 ////////////////////////////////////////////////////////////////////////////////////////////
     async createProject() {
+
+      if (this.$route.path === '/shared-projects') {
+        this.$router.push('/projects')
+        return
+      }
 
       try {
 
@@ -350,7 +352,6 @@ export default {
         const project = await res.json();
 
         console.log(project)
-        console.log('USUARIOS AÑADIDOS:', this.newProjectUsers)
 
         for (const user of this.newProjectUsers) {
 
@@ -398,14 +399,18 @@ export default {
 
         if (!response.ok) {
           const error = await response.json();
-          throw new Error(error.message || 'Error al eliminar el proyecto');
+          throw new Error(error.message || 'No autorizado');
         }
 
           // opcional: actualizar UI
         console.log('Proyecto eliminado correctamente');
         this.loadProjects();
+
       } catch (error) {
         console.error('Error deleting project:', error.message);
+
+        this.showErrorPopup(error.message)
+
       }
     },
 
@@ -570,13 +575,6 @@ export default {
           u => u.id_user === user.id_user
         )
 
-        const currentUser = JSON.parse(localStorage.getItem('user'))
-
-        if (user.id_user === currentUser.id_user) {
-          return
-        }
-        
-
         if (!exists) {
           this.newProjectUsers.push(user)
         }
@@ -614,28 +612,21 @@ export default {
             }
           )
 
-          const data = await response.json()
-
-          console.log(data)
-
           if (!response.ok) {
-            this.showErrorPopup(data.message)
+
+            const error = await response.json()
+
+            this.showErrorPopup(error.message)
+
             return
           }
 
-          // RECARGAR PROYECTOS
           await this.loadProjects()
 
-          // RECARGAR SIDEBAR
-          const updatedProject = this.projects.find(
+          this.sidebarProject = this.projects.find(
             p => p.id_project === this.sidebarProject.id_project
           )
 
-          if (updatedProject) {
-            this.sidebarProject = updatedProject
-          }
-
-          // RESET SELECT
           this.selectedUserId = ''
 
         } catch (error) {
@@ -644,10 +635,9 @@ export default {
 
           this.showErrorPopup('Error inesperado')
         }
-      },
+      }, 
 ///////////////////////////////////////////////////////////////
     async removeUserFromProject(userId) {
-
       try {
 
         const response = await fetch(
@@ -676,9 +666,11 @@ export default {
 
       } catch (error) {
 
+        console.error(error)
+
         this.showErrorPopup('Error inesperado')
       }
-    },  
+    },
 /////////////////////////////////////////////////////////////////////////////
     async changeRole(userId, event) {
       await fetch(
@@ -1382,25 +1374,18 @@ li button:first-child:hover {
 
 .error-popup {
   position: fixed;
-
   bottom: 30px;
   right: 30px;
-
   background: #ef4444;
   color: white;
-
   padding: 14px 20px;
-
   border-radius: 12px;
-
   font-family: Poppins;
   font-weight: 600;
-
   box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-
   z-index: 999999;
-
   animation: popupFade 0.3s ease;
+  pointer-events: none;
 }
 
 @keyframes popupFade {

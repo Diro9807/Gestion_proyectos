@@ -84,7 +84,7 @@ export default {
 
         localStorage.setItem('auth_token', data.access_token)
         localStorage.setItem('auth_user', JSON.stringify(data.user))
-        
+
         this.$router.push('/projects')
 
       } catch (error) {
