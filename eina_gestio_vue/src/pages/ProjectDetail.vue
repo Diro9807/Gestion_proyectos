@@ -1,4 +1,5 @@
 <!-- PAGINA TAREAS -->
+ 
 <template>
   <div class="project-detail">
 
@@ -43,91 +44,105 @@
 
       </div>
       <ul>
-        <li v-for="t in tasks" :key="t.id_task" :class="t.status">
-          <div class="task-content">
+<draggable
+          v-model="tasks"
+          item-key="id_task"
+          @end="saveTaskOrder"
+          animation="200"
+          ghost-class="sortable-ghost"
+          drag-class="sortable-drag"
+          chosen-class="sortable-chosen"
+        >
+          <template #item="{ element: t }">
 
-            <!-- NOMBRE -->
-            <input
-              v-model="t.name"
-              class="task-title-input"
-              @change="updateTask(t)"
-            />
+            <li :class="t.status">
 
-            <!-- DESCRIPCIÓN -->
-            <textarea
-              v-model="t.description"
-              placeholder="Descripción"
-              class="task-description"
-              @change="updateTask(t)"
-            ></textarea>
+              <div class="task-content">
 
-            <!-- USUARIO -->
-            <select
-              v-model="t.user_id"
-              @change="updateTask(t)"
-            >
-              <option :value="null">Sin asignar</option>
+                <!-- NOMBRE -->
+                <input
+                  v-model="t.name"
+                  class="task-title-input"
+                  @change="updateTask(t)"
+                />
 
-              <option
-                v-for="u in users"
-                :key="u.id_user"
-                :value="u.id_user"
-              >
-                {{ u.name }}
-              </option>
-            </select>
+                <!-- DESCRIPCIÓN -->
+                <textarea
+                  v-model="t.description"
+                  placeholder="Descripción"
+                  class="task-description"
+                  @change="updateTask(t)"
+                ></textarea>
 
-            <!-- FECHA INICIO -->
-            <input
-              type="date"
-              v-model="t.start_date"
-              class="task-date-input"
-              @change="updateTask(t)"
-            />
+                <!-- USER -->
+                <select
+                  v-model="t.user_id"
+                  @change="updateTask(t)"
+                >
+                  <option :value="null">Sin asignar</option>
 
-            <!-- FECHA FIN -->
-            <input
-              type="date"
-              v-model="t.end_date"
-              class="task-date-input"
-              @change="updateTask(t)"
-            />
+                  <option
+                    v-for="u in users"
+                    :key="u.id_user"
+                    :value="u.id_user"
+                  >
+                    {{ u.name }}
+                  </option>
+                </select>
 
-            <!-- FECHA LÍMITE -->
-            <input
-              type="date"
-              v-model="t.due_date"
-              class="task-date-input"
-              @change="updateTask(t)"
-            />
+                <!-- FECHAS -->
+                <input
+                  type="date"
+                  v-model="t.start_date"
+                  class="task-date-input"
+                  @change="updateTask(t)"
+                />
 
-            <!-- ESTADO -->
-            <select v-model="t.status"@change="updateTask(t)":class="t.status"
-            >
-              <option value="none">-</option>
-              <option value="pending">Pendiente</option>
-              <option value="in_progress">En progreso</option>
-              <option value="review">En revisión</option>
-              <option value="approved">Aprobada</option>
-              <option value="completed">Completada</option>
-            </select>
+                <input
+                  type="date"
+                  v-model="t.end_date"
+                  class="task-date-input"
+                  @change="updateTask(t)"
+                />
 
-            
-            
+                <input
+                  type="date"
+                  v-model="t.due_date"
+                  class="task-date-input"
+                  @change="updateTask(t)"
+                />
 
-            <!-- BOTONES -->
-            <div class="task-actions">            
+                <!-- ESTADO -->
+                <select
+                  v-model="t.status"
+                  @change="updateTask(t)"
+                  :class="t.status"
+                >
+                  <option value="none">-</option>
+                  <option value="pending">Pendiente</option>
+                  <option value="in_progress">En progreso</option>
+                  <option value="review">En revisión</option>
+                  <option value="approved">Aprobada</option>
+                  <option value="completed">Completada</option>
+                </select>
 
-              <button @click="deleteTask(t.id_task)">
-                ❌ 
-              </button>
+                <!-- BOTONES -->
+                <div class="task-actions">
 
-            </div>
+                  <button @click="deleteTask(t.id_task)">
+                    ❌
+                  </button>
 
-          </div>
+                </div>
 
-        </li>
+              </div>
+
+            </li>
+
+          </template>
+        </draggable>
       </ul>
+      
     </div>
     
 
@@ -232,8 +247,16 @@
 </template>
 
 <script>
+import draggable from 'vuedraggable'
 export default {
+  
+  components: {
+    draggable
+  },
+
   props: ['id'],
+  
+
 
   data() {
     return {
@@ -431,6 +454,39 @@ export default {
       this.newDueDate = ''
       this.newStatus = 'none'
       this.newUserId = null
+    },
+
+/////////////////////////////////////////////////////////////////////////
+    async saveTaskOrder() {
+
+      try {
+
+        const orderedTasks = this.tasks.map((task, index) => ({
+          id_task: task.id_task,
+          position: index
+        }))
+
+        await fetch(
+          'http://127.0.0.1:8000/api/tasks/reorder',
+          {
+            method: 'POST',
+
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+
+            body: JSON.stringify({
+              tasks: orderedTasks
+            }),
+          }
+        )
+
+      } catch (error) {
+
+        console.error('Error guardando orden:', error)
+
+      }
     }
 
   }
@@ -452,23 +508,25 @@ export default {
 .project-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-top: 50px;
-  margin-bottom: 25px;
+  align-items: flex-end;
+  
+  margin: 60px 80px 20px 80px;
 }
-
-/* TITULO */
 
 .project-title {
   font-family: Poppins;
   font-size: 48px;
   font-weight: bold;
-
   color: white;
 
   margin: 0;
 
   letter-spacing: -1px;
+}
+
+.tasks-topbar {
+  display: flex;
+  align-items: center;
 }
 
 
@@ -530,6 +588,7 @@ button {
 .create-task button {
   background-color: #ef7e15;
   color: white;
+ 
 }
 
 .create-task button:hover {
@@ -538,6 +597,7 @@ button {
 .complet-grid{
   background-color: #eaeaea;
   border-radius: 12px;
+  margin: 0px 80px;
 }
 /* HEADER TABLA */
 .tasks-header {
@@ -573,8 +633,7 @@ button {
     140px
     160px
     100px
-    300px;
-    
+    180px;   
 
   gap: 20px;
   align-items: center;
@@ -818,8 +877,10 @@ li.completed {
   color: white;
   font-family: Poppins;
   border-radius: 12px;
-  padding: 12px 18px;
-  font-weight: bold;
+  padding: 14px 22px;
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .create-task-btn:hover {
@@ -905,5 +966,22 @@ li.completed {
 .dates-grid label {
   font-weight: bold;
   font-family: Poppins;
+}
+
+/* ========================= */
+        /* DRAG&DROP */
+/* ========================= */
+
+
+.sortable-ghost {
+  opacity: 0.4;
+}
+
+.sortable-drag {
+  transform: rotate(2deg);
+}
+
+.sortable-chosen {
+  cursor: grabbing;
 }
 </style>

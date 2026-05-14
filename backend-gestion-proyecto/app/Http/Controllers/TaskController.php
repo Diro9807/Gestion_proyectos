@@ -29,7 +29,9 @@ class TaskController extends Controller{
             ], 403);
         }
 
-        return $project->tasks;
+        return $project->tasks()
+            ->orderBy('position')
+            ->get();
     }
 
     //  Crear tarea
@@ -98,7 +100,7 @@ class TaskController extends Controller{
         return response()->json($task);
     }
 
-    // 🔹 Eliminar
+    //  Eliminar
     public function destroy(Task $task){
 
         $project = Project::find($task->project_task_id);
@@ -114,6 +116,21 @@ class TaskController extends Controller{
 
         return response()->json([
             'message' => 'Tarea eliminada'
+        ]);
+    }
+
+    public function reorder(Request $request){
+
+        foreach ($request->tasks as $taskData) {
+
+            Task::where('id_task', $taskData['id_task'])
+                ->update([
+                    'position' => $taskData['position']
+                ]);
+        }
+
+        return response()->json([
+            'message' => 'Orden actualizado'
         ]);
     }
 }

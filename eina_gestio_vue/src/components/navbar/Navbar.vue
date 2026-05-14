@@ -110,6 +110,7 @@ export default {
 <style scoped>
 
 .navbar {
+  margin: 25px 60px;
   height: 72px;
   background: rgba(186, 186, 186, 0.92);
   backdrop-filter: blur(10px);
@@ -117,8 +118,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 0 35px;
-  border-radius: 0 0 14px 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);  
+  border-radius: 12px 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
   position: sticky;
   top: 0;
   z-index: 9999;
@@ -245,9 +246,9 @@ export default {
   align-items: center;
   gap: 10px;
 
-  background: rgba(255,255,255,0.25);
+  background: rgba(255, 255, 255, 0.765);
 
-  padding: 6px 12px;
+  padding: 5px 15px 5px 8px;
 
   border-radius: 999px;
 
@@ -255,8 +256,8 @@ export default {
 }
 
 .navbar-avatar {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
 
   border-radius: 50%;
 
