@@ -32,12 +32,13 @@ class TaskController extends Controller{
         return $project->tasks;
     }
 
-    // 🔹 Crear tarea
-    public function store(Request $request){
+    //  Crear tarea
+        public function store(Request $request){
 
         $project = Project::find($request->project_task_id);
 
         if (!$project) {
+
             return response()->json([
                 'message' => 'Proyecto no encontrado'
             ], 404);
@@ -50,6 +51,10 @@ class TaskController extends Controller{
             ], 403);
         }
 
+        $request->validate([
+            'user_id' => 'nullable|exists:users,id_user'
+        ]);
+
         $task = Task::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -58,14 +63,14 @@ class TaskController extends Controller{
             'due_date' => $request->due_date,
             'status' => $request->status ?? 'pending',
             'project_task_id' => $request->project_task_id,
-            'user_id' => $request->user_id
+            'user_id' => $request->user_id,
         ]);
 
         return response()->json($task);
     }
 
-    // 🔹 Actualizar
-    public function update(Request $request, Task $task){
+    //  Actualizar
+        public function update(Request $request, Task $task){
 
         $project = Project::find($task->project_task_id);
 
@@ -76,13 +81,18 @@ class TaskController extends Controller{
             ], 403);
         }
 
+        $request->validate([
+            'user_id' => 'nullable|exists:users,id_user'
+        ]);
+
         $task->update([
             'name' => $request->name,
             'description' => $request->description,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'due_date' => $request->due_date,
-            'status' => $request->status
+            'status' => $request->status,
+            'user_id' => $request->user_id,
         ]);
 
         return response()->json($task);

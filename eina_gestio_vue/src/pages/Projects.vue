@@ -9,7 +9,7 @@
 
         <button
           class="create-project-btn"
-          @click="showCreateModal = true"
+          @click="openCreateModal"
         >
           + Nuevo Proyecto
         </button>
@@ -121,10 +121,11 @@
 
               <option
                 v-for="u in users"
+                :key="u.id_user"
+                :value="u.id_user"
               >
                 {{ u.name }}
               </option>
-
             </select>
 
             <button @click="addUserToProject">
@@ -199,10 +200,14 @@
               </option>
 
               <option
-                v-for="u in users"
+                v-for="u in users.filter(
+                  user => Number(user.id_user) !== Number(currentUser?.id_user)
+                )"
+                :key="u.id_user"
+                :value="u.id_user"
               >
                 {{ u.name }}
-              </option>            
+              </option>          
 
             </select>
             
@@ -219,8 +224,17 @@
               :key="u.id_user"
               class="selected-user">
               {{ u.name }}
+                <span
+                  v-if="u.fixed"
+                  class="owner-badge"
+                >
+                  OWNER
+                </span>
 
-              <button @click="removeUserFromNewProject(u.id_user)">
+              <button
+                v-if="!u.fixed"
+                @click="removeUserFromNewProject(u.id_user)"
+              >
                 ❌
               </button>
             </span>
@@ -272,7 +286,14 @@ export default {
   },
 
   mounted() {
-    this.currentUser = JSON.parse(localStorage.getItem('user'))
+
+    const storedUser = localStorage.getItem('auth_user')
+
+    if (storedUser) {
+      this.currentUser = JSON.parse(storedUser)
+    }
+
+    console.log('CURRENT USER:', this.currentUser)
 
     this.loadProjects()
     this.loadUsers()
@@ -288,8 +309,23 @@ export default {
     closeProject() {
       this.selectedProject = null
     },
+    openCreateModal() {
 
-    ///////////////////////
+      this.showCreateModal = true
+
+      const currentUser = this.currentUser
+
+      this.newProjectUsers = [
+        {
+          id_user: currentUser.id_user,
+          name: currentUser.name || currentUser.username,
+          fixed: true,
+          role: 'owner'
+        }
+      ]
+    },
+
+    //////////////////////////////////////////////////////////////////
     async loadProjects() {
 
       console.log('Cargando proyectos...')
@@ -366,7 +402,7 @@ export default {
 
               body: JSON.stringify({
                 user_id: user.id_user,
-                role: 'member',
+                role: user.fixed ? 'owner' : 'member',
               }),
             }
           )
@@ -558,24 +594,30 @@ export default {
         this.selectedUserId = ''
       },
 
+/////////////////////////////////////////////////////////////////////
       addUserToNewProject() {
 
         if (!this.selectedUserId) return
 
         const user = this.users.find(
-          u => u.id_user == this.selectedUserId
+          u => Number(u.id_user) === Number(this.selectedUserId)
         )
+
+        // SI NO EXISTE EL USER
+        if (!user) {
+          console.error('Usuario no encontrado')
+          return
+        }
 
         const exists = this.newProjectUsers.some(
           u => u.id_user === user.id_user
         )
 
-        const currentUser = JSON.parse(localStorage.getItem('user'))
+        const currentUser = JSON.parse(localStorage.getItem('auth_user') || 'null')
 
-        if (user.id_user === currentUser.id_user) {
+        if (currentUser?.id_user === user.id_user) {
           return
         }
-        
 
         if (!exists) {
           this.newProjectUsers.push(user)
@@ -583,7 +625,7 @@ export default {
 
         this.selectedUserId = ''
       },
-
+//////////////////////////////////////////////////////////////////////////////
       removeUserFromNewProject(userId) {
         this.newProjectUsers =
           this.newProjectUsers.filter(
@@ -1414,6 +1456,15 @@ li button:first-child:hover {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.owner-badge {
+  background: #facc15;
+  color: #713f12;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: bold;
 }
 
 </style>
