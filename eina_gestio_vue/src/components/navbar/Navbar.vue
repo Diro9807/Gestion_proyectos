@@ -110,15 +110,15 @@ export default {
 <style scoped>
 
 .navbar {
-  margin: 25px 60px;
-  height: 72px;
+  margin: 0px 62px 0px 62px;
+  height: 65px;
   background: rgba(186, 186, 186, 0.92);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 35px;
-  border-radius: 12px 12px;
+  border-radius: 0px 0px 12px 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.18);
   position: sticky;
   top: 0;

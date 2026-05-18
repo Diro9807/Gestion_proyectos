@@ -5,7 +5,7 @@
 
       <div class="projects-header">
 
-        <h1>/Proyectos</h1>
+        <h1>/Proyectos-Compartidos</h1>
 
       </div>
 
@@ -16,6 +16,11 @@
           <!-- NORMAL -->
           <div>
             <h2 class="project-title">{{ p.name }}</h2>
+
+            <div class="total-tareas">
+              {{ tasks[p.id_project]?.length || 0 }} tareas
+            </div>
+
             <h3 class="project-users-title">Colaboradores</h3>
             <div class="project-users">
               <span
@@ -772,13 +777,14 @@ button {
   align-items: center;
   padding: 0 0px;
   margin-bottom: 20px;
+  height: 80px;
 }
 
 .projects-header h1{
   font-family: Poppins;
   color: white;
+  font-size: 50px;
 }
-
 /* BOTÓN CREAR */
 .create-project-btn {
   background: #FE9F5B;
@@ -813,9 +819,11 @@ ul {
 /* CARD PROYECTO */
 li {
   background: #D9D9D9;
+  margin-top: 20px;
+  margin-bottom: 20px;
   padding: 20px;
   height: 200px;
-  width: 300px;
+  width: 330px;
   border-radius: 12px;
   position: relative;
   display: flex;
@@ -851,20 +859,34 @@ li div {
   margin: 0;
 }
 
+.total-tareas {
+  position: absolute;
+  top: 40px;
+  left: -8px;
+  font-family: Poppins;
+  font-size: 14px;
+  
+  color: #64748b;
+}
+
+li:hover .total-tareas {
+  color: white;
+}
+
 .project-users-title{
   position: absolute;
-  top: 60px;
+  top: 98px;
   left: 23px;
   right: 15px;
   font-family: Poppins;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 /* USERS EN CARD */
 .project-users {
   position: absolute;
-  top: 75px;
-  left: -5px;
+  top: 100px;
+  left: -8px;
   right: 15px;
   font-size: 13px;
   font-family: Poppins;
@@ -879,7 +901,7 @@ li div {
 /* FECHA PROYECTO */
 .project-description {
   position: absolute;
-  top: 180px;
+  top: 150px;
   left: 15px;
   font-size: 13px;
   font-family: Poppins;
@@ -953,10 +975,12 @@ li button:first-child:hover {
 /* ========================= */
 
 .project-sidebar {
-  width: 420px;
+  width: 700px;
   border-radius: 12px;
-  height: 100vh;
+  height: 85vh;
   max-height: 100vh;
+  margin-top: 70px;
+  margin-right: 32px;
   background: #d9d9d9;
   padding: 35px;
   position: relative;
@@ -987,7 +1011,7 @@ li button:first-child:hover {
 
 .close-sidebar {
   position: absolute;
-  top: 20px;
+  top: 30px;
   right: 20px;
   background: transparent;
   border: none;
@@ -1023,23 +1047,29 @@ li button:first-child:hover {
 
 .sidebar-info {
   background: #e2e8f0;
-  padding: 20px;
+  padding: 0px 20px;
   border-radius: 12px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  gap: 20px;
   font-family: Poppins;
+  display: flex;
   
 }
 
 /* BOTÓN ABRIR */
 
 .open-project-btn {
-  width: 100%;
+  width: 30%;
   background: #ef7e15;
   color: white;
   padding: 14px;
   border-radius: 12px;
   font-size: 16px;
   font-weight: bold;
+  position: absolute;
+  top: 85%;
+  left: 35%;
+  
 }
 
 .open-project-btn:hover {
@@ -1059,7 +1089,7 @@ li button:first-child:hover {
 /* INPUT TITULO SIDEBAR */
 
 .sidebar-title-input {
-  width: 100%;
+  width: 90%;
   font-size: 34px;
   font-weight: bold;
   border: none;
@@ -1072,8 +1102,8 @@ li button:first-child:hover {
 /* TEXTAREA DESCRIPCIÓN */
 
 .sidebar-description-input {
-  width: 91%;
-  min-height: 180px;
+  width: 100%;
+  min-height: 120px;
   resize: vertical;
   border: none;
   outline: none;
@@ -1116,7 +1146,7 @@ li button:first-child:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  width: 415px;
+  width: 620px;
   padding: 5px 0;
 }
 
@@ -1127,10 +1157,10 @@ li button:first-child:hover {
   align-items: center;
   gap: 10px;
   background: #e2e8f0;
-  padding: 22px 14px;
+  padding: 30px 14px;
   border-radius: 14px;
   height: 15px;
-  min-width: 150px;
+  min-width: 195px;
   max-width: 50px;
   position: relative;
   transition: 0.2s;
@@ -1144,8 +1174,8 @@ li button:first-child:hover {
 /* AVATAR */
 
 .user-avatar {
-  width: 15px;
-  height: 15px;
+  width: 25px;
+  height: 25px;
   border-radius: 50%;
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   display: flex;
@@ -1161,7 +1191,7 @@ li button:first-child:hover {
 /* USER ROL */
 
 .user-role-badge {
-  margin-top: 4px;
+  margin-top: 1px;
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 8px;
@@ -1240,7 +1270,7 @@ li button:first-child:hover {
 .remove-user{
   position:absolute;
   top: -20%;
-  left: 70%;
+  left: 65%;
 }
 
 .remove-user-btn {
