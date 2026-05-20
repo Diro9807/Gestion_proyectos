@@ -9,7 +9,7 @@
 
       </div>
 
-      <ul>
+      <ul @mousemove="handleMouseMove" :style="backgroundStyle">
         <li 
           v-for="p in projects" :key="p.id_project" @click="openSidebar(p)">
 
@@ -272,7 +272,33 @@ export default {
       errorMessage: '',
       showError: false,
 
+      mouseX: '50%',
+      mouseY: '50%',
+
     }    
+  },
+
+  computed: {
+
+    backgroundStyle() {
+
+      return {
+        background: `
+          radial-gradient(
+            circle 1500px at ${this.mouseX} ${this.mouseY},
+            #C8C8C8,
+            #A1A1A1,
+            transparent 100%
+          ),
+          linear-gradient(
+            135deg,
+            #bcbcbc,
+            #b2b2b2,
+            #C1C1C1
+          )
+        `
+      }
+    }
   },
 
   mounted() {
@@ -717,6 +743,12 @@ export default {
       }, 3000)
     },
 
+    handleMouseMove(e) {
+
+      this.mouseX = `${(e.clientX / window.innerWidth) * 100}%`
+      this.mouseY = `${(e.clientY / window.innerHeight) * 100}%`
+    },
+
 
   },
 }
@@ -725,7 +757,7 @@ export default {
 <style scoped>
 /* CONTENEDOR GENERAL */
 .Projects-content {
-    background: linear-gradient(160deg, #6d97d6, #07173f);
+  background: linear-gradient(180deg, #6d97d6, #07173f);
   min-height: 100vh;
 }
 
@@ -808,6 +840,7 @@ ul {
   list-style: none;
   padding: 20px;
   background-color: rgb(188, 188, 188);
+  box-shadow: 10px 30px 15px rgba(0,0,0,0.25);
   border-radius: 12px;
   display: grid;
   grid-template-columns: repeat(4, 350px); 

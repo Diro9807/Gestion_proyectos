@@ -1,5 +1,5 @@
 <template>
-  <div class="register-container">
+  <div class="register-container" @mousemove="handleMouseMove" :style="backgroundStyle">
 
     <div class="left-panel">
       <div class="logo-container">
@@ -52,6 +52,31 @@ export default {
       },
       sending: false,
       error: '',
+
+      mouseX: '50%',
+      mouseY: '50%',
+    }
+  },
+  computed: {
+
+    backgroundStyle() {
+
+      return {
+        background: `
+          radial-gradient(
+            circle 3000px at ${this.mouseX} ${this.mouseY},
+            rgba(109,151,214,0.55),
+            rgba(53,92,155,0.15),
+            transparent 80%
+          ),
+          linear-gradient(
+            135deg,
+            #07173f,
+            #0f2f70,
+            #07173f
+          )
+        `
+      }
     }
   },
 
@@ -93,16 +118,26 @@ export default {
         this.sending = false
       }
     },
+
+    handleMouseMove(e) {
+
+      this.mouseX = `${(e.clientX / window.innerWidth) * 100}%`
+      this.mouseY = `${(e.clientY / window.innerHeight) * 100}%`
+    },
   },
 }
 </script>
 
 <style>
+
+
 .register-container {
   height: 100vh;
   display: flex;
-  font-family: Arial, sans-serif;
-  
+  justify-content: center;
+  align-items: center;
+  font-family: Poppins;  
+  transition: background 0.08s linear;
 }
 
 /* IZQUIERDA */
@@ -137,7 +172,13 @@ export default {
 
 /* CARD */
 .register-card {
-  background: white;
+  background: #d9d9d9;
+
+  backdrop-filter: blur(10px);
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
   padding: 35px;
   border-radius: 12px;
   width: 450px;
@@ -145,6 +186,13 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 15px;
+}
+
+.register-card:hover {
+  transform: translateY(-8px);
+
+  box-shadow:
+    0 25px 45px rgba(0,0,0,0.55);
 }
 
 .register-card h2 {

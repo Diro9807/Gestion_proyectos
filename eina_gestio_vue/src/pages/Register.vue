@@ -1,5 +1,5 @@
 <template>
-  <div class="register-container">
+  <div class="register-container" @mousemove="handleMouseMove" :style="backgroundStyle">
     <form class="register-card" @submit.prevent="registerUser">
 
       <h2>Crear Cuenta</h2>
@@ -54,6 +54,32 @@ export default {
       sending: false,
       error: '',
       success: '',
+
+      mouseX: '50%',
+      mouseY: '50%',
+    }
+  },
+
+  computed: {
+
+    backgroundStyle() {
+
+      return {
+        background: `
+          radial-gradient(
+            circle 3000px at ${this.mouseX} ${this.mouseY},
+            rgba(109,151,214,0.55),
+            rgba(53,92,155,0.15),
+            transparent 80%
+          ),
+          linear-gradient(
+            135deg,
+            #07173f,
+            #0f2f70,
+            #07173f
+          )
+        `
+      }
     }
   },
 
@@ -119,30 +145,70 @@ export default {
         this.sending = false
       }
     },
+
+    handleMouseMove(e) {
+
+      this.mouseX = `${(e.clientX / window.innerWidth) * 100}%`
+      this.mouseY = `${(e.clientY / window.innerHeight) * 100}%`
+    },
   },
 }
 </script>
 
 <style>
 /* Fondo general */
+
+.register-container::before {
+  content: '';
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255,255,255,0.15),
+      transparent 40%
+    );
+
+  pointer-events: none;
+}
+
 .register-container {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   background: linear-gradient(135deg, #6d97d6, #07173f);
+  position: relative;
+  overflow: hidden;
 }
+
+
 
 /* Tarjeta */
 .register-card {
-  background: #D9D9D9;
-  padding: 30px;
+  background: #d9d9d9;
+
+  backdrop-filter: blur(10px);
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+  padding: 35px;
   border-radius: 12px;
-  width: 350px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   gap: 15px;
+}
+
+.register-card:hover {
+  transform: translateY(-8px);
+
+  box-shadow:
+    0 25px 45px rgba(0,0,0,0.55);
 }
 
 /* Título */

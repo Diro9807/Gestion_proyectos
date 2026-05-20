@@ -5,6 +5,7 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Task;
 
 
 class ProjectController extends Controller
@@ -50,18 +51,26 @@ class ProjectController extends Controller
 
     public function destroy($id){
 
-        $project = Project::findOrFail($id);
+    $project = Project::findOrFail($id);
 
-        if ($response = $this->checkProjectOwner($project)) {
-            return $response;
-        }
-
-        $project->delete();
-
-        return response()->json([
-            'message' => 'Proyecto eliminado'
-        ]);
+    if ($response = $this->checkProjectOwner($project)) {
+        return $response;
     }
+
+    // BORRAR TASKS DEL PROYECTO
+    Task::where('project_task_id', $project->id_project)
+        ->delete();
+
+    // BORRAR RELACIONES CON USUARIOS
+    $project->users()->detach();
+
+    // BORRAR PROYECTO
+    $project->delete();
+
+    return response()->json([
+        'message' => 'Proyecto eliminado'
+    ]);
+}
 
     public function update(Request $request, $id){
 
