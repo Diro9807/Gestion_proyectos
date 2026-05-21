@@ -110,6 +110,8 @@ export default {
         localStorage.setItem('auth_token', data.access_token)
         localStorage.setItem('auth_user', JSON.stringify(data.user))
 
+        window.dispatchEvent(new Event('auth-changed'))
+
         this.$router.push('/projects')
 
       } catch (error) {

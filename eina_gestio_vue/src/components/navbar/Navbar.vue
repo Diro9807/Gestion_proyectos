@@ -60,12 +60,21 @@
 </template>
 
 <script>
+
 export default {
   name: 'NavbarComponent',
 
+    created() {
+
+    window.addEventListener('auth-changed', this.loadUser)
+
+    this.loadUser()
+  },
+
   data() {
+    
     return {
-      user: null
+      user: null      
     }
   },
 
@@ -91,17 +100,24 @@ export default {
 
   methods: {
     loadUser() {
-      this.user = JSON.parse(localStorage.getItem('auth_user'))
+
+      const user = localStorage.getItem('auth_user')
+
+      this.user = user
+        ? JSON.parse(user)
+        : null
     },
 
     logout() {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
 
-      this.$router.push('/login')
+      window.dispatchEvent(new Event('auth-changed'))
 
-      window.location.reload()
+      this.$router.push('/login')
     },
+
+
   },
 }
 
