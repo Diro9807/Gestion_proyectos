@@ -49,12 +49,5 @@ class User extends Authenticatable
 
 
 }
-// USUARIOS //
 
-// email: a@gmail.com pass: 1234567
-// email: b@gmail.com pass: 1234567
-// email: c@gmail.com pass: 1234567
-// email: d@gmail.com pass: 1234567
-// email: e@gmail.com pass: 1234567
-// email: f@gmail.com pass: 1234567
-// email: g@gmail.com pass: 1234567
+

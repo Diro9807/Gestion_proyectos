@@ -98,6 +98,7 @@
                       v-model="t.start_date"
                       class="task-date-input"
                       @change="updateTask(t)"
+                      :min="minDate"
                     />
 
                     <input
@@ -105,6 +106,7 @@
                       v-model="t.end_date"
                       class="task-date-input"
                       @change="updateTask(t)"
+                      :min="minDate"
                     />
 
                     <input
@@ -112,6 +114,7 @@
                       v-model="t.due_date"
                       class="task-date-input"
                       @change="updateTask(t)"
+                      :min="minDate"
                     />
 
                     <!-- ESTADO -->
@@ -181,6 +184,7 @@
           <input
             type="date"
             v-model="newStartDate"
+            :min="minDate"
           />
         </div>
 
@@ -190,6 +194,7 @@
           <input
             type="date"
             v-model="newEndDate"
+            :min="minDate"
           />
         </div>
 
@@ -199,6 +204,7 @@
           <input
             type="date"
             v-model="newDueDate"
+            :min="minDate"
           />
         </div>
 
@@ -272,6 +278,7 @@ export default {
       showCreateTaskModal: false,
       newUserId: null,
 
+      minDate: new Date().toISOString().split('T')[0],
 
     }
   },

@@ -2,15 +2,25 @@
   <div class="register-container" @mousemove="handleMouseMove" :style="backgroundStyle">
 
     <div class="left-panel">
-      <div class="logo-container">
-        <img src="/logo.png" alt="Logo" class="logo" />
-      </div>      
+      <div
+        class="logo-container"
+        @click="showCard = !showCard"
+      >
+        <img
+          src="/logo.png"
+          alt="Logo"
+          class="logo"
+        />
+      </div>  
+
       <h1>Welcome to Projects</h1>
       
     </div>
 
     <div class="right-panel">
-      <form class="register-card" @submit.prevent="loginUser">
+      <form v-if="!isMobile || showCard"
+        class="register-card"
+        @submit.prevent="loginUser">
 
         <h2>Iniciar Sesión</h2>
 
@@ -52,6 +62,8 @@ export default {
       },
       sending: false,
       error: '',
+      showCard: false,
+      isMobile: window.innerWidth <= 768,
 
       mouseX: '50%',
       mouseY: '50%',
@@ -80,7 +92,36 @@ export default {
     }
   },
 
+  mounted() {
+
+    window.addEventListener(
+      'resize',
+      this.checkScreen
+    )
+
+    this.checkScreen()
+  },
+
+  beforeUnmount() {
+
+    window.removeEventListener(
+      'resize',
+      this.checkScreen
+    )
+  },
+
   methods: {
+    checkScreen() {
+
+      this.isMobile =
+        window.innerWidth <= 768
+
+      if (!this.isMobile) {
+
+        this.showCard = true
+      }
+    },
+
     async loginUser() {
       if (!this.user.email || !this.user.password) {
         this.error = 'Completa todos los campos'
@@ -188,6 +229,30 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  animation: fadeCard 0.35s ease;
+}
+
+@keyframes fadeCard {
+
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.logo-container {
+  cursor: pointer;
+
+  transition: transform 0.25s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.05);
 }
 
 .register-card:hover {
@@ -232,5 +297,50 @@ export default {
 .error {
   color: red;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+
+  .register-container {
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .left-panel {
+    flex: unset;
+    margin-top: 40px;
+    gap: 5px;
+  }
+
+  .left-panel h1 {
+    font-size: 36px;
+    text-align: center;
+  }
+
+  .logo {
+    width: 180px;
+  }
+
+  .right-panel {
+    width: 100%;
+    flex: unset;
+    margin-top: 25px;
+  }
+
+  .register-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 25px;
+    margin-bottom: 30px;
+  }
+
+  .form-group input {
+    font-size: 16px;
+  }
+
+  .btn {
+    width: 100%;
+  }
 }
 </style>

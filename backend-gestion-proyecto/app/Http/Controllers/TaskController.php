@@ -54,7 +54,10 @@ class TaskController extends Controller{
         }
 
         $request->validate([
-            'user_id' => 'nullable|exists:users,id_user'
+            'user_id' => 'nullable|exists:users,id_user',
+            'start_date' => 'nullable|date|after_or_equal:today',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'due_date' => 'nullable|date|after_or_equal:end_date'
         ]);
 
         $task = Task::create([
@@ -83,9 +86,13 @@ class TaskController extends Controller{
             ], 403);
         }
 
-        $request->validate([
-            'user_id' => 'nullable|exists:users,id_user'
+         $request->validate([
+            'user_id' => 'nullable|exists:users,id_user',
+            'start_date' => 'nullable|date|after_or_equal:today',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'due_date' => 'nullable|date|after_or_equal:end_date'
         ]);
+
 
         $task->update([
             'name' => $request->name,
