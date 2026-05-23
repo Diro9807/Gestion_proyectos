@@ -1,10 +1,13 @@
-<template>
+<template>  
   <nav class="navbar">
 
-    <!-- LOGO -->
-    <div class="logo-section" @click="$router.push('/projects')">
+  <!-- IZQUIERDA -->
+  <div class="logo-section">
 
-      <!-- CAMBIA LA RUTA POR TU IMAGEN -->
+    <div
+      class="logo-wrapper"
+      @click="$router.push('/projects')"
+    >
       <img
         src="/logo.png"
         alt="Logo"
@@ -14,11 +17,36 @@
       <span class="logo-text">
         rojects
       </span>
+    </div>
+
+    <!-- USER SOLO MÓVIL -->
+    <div class="navbar-user mobile-user">
+
+      <div class="navbar-avatar">
+        {{ userInitial }}
+      </div>
+
+      <span class="navbar-username">
+        {{ userName }}
+      </span>
 
     </div>
 
-    <!-- LINKS -->    
-  <div class="links">
+    <!-- HAMBURGUESA -->
+    <button
+      class="mobile-menu-btn"
+      @click="mobileMenuOpen = !mobileMenuOpen"
+    >
+      ☰
+    </button>
+
+  </div>
+
+  <!-- LINKS -->
+  <div
+    class="links"
+    :class="{ open: mobileMenuOpen }"
+  >
 
     <button
       class="links-btn"
@@ -34,8 +62,8 @@
       Compartidos
     </button>
 
-    <!-- USER TAG -->
-    <div class="navbar-user">
+    <!-- USER DESKTOP -->
+    <div class="navbar-user desktop-user">
 
       <div class="navbar-avatar">
         {{ userInitial }}
@@ -56,7 +84,7 @@
 
   </div>
 
-  </nav>
+</nav>
 </template>
 
 <script>
@@ -74,7 +102,8 @@ export default {
   data() {
     
     return {
-      user: null      
+      user: null,   
+      mobileMenuOpen: false,   
     }
   },
 
@@ -157,6 +186,14 @@ export default {
   transition: 0.2s;
 }
 
+.logo-wrapper {
+
+  display: flex;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+}
+
 .logo-section:hover {
   transform: scale(1.02);
 }
@@ -172,7 +209,8 @@ export default {
   font-weight: 700;
   font-family: Poppins;
   color: #4c4c4c;
-  margin-left: -10px;
+  margin-top: 7px;
+  margin-left: 5px;
   letter-spacing: 0.5px;
 }
 
@@ -271,6 +309,10 @@ export default {
   font-family: Poppins;
 }
 
+.mobile-user {
+  display: none;
+}
+
 .navbar-avatar {
   width: 32px;
   height: 32px;
@@ -293,6 +335,130 @@ export default {
 .navbar-username {
   font-weight: 600;
   color: #374151;
+}
+
+.mobile-menu-btn {
+  display: none;
+
+  background: rgba(255,255,255,0.45);
+
+  border: none;
+
+  width: 42px;
+
+  height: 42px;
+
+  border-radius: 10px;
+
+  font-size: 24px;
+
+  cursor: pointer;
+
+  color: #374151;
+
+  align-items: center;
+
+  justify-content: center;
+
+  transition: 0.25s;
+}
+
+.mobile-menu-btn:hover {
+
+  background: rgba(255,255,255,0.75);
+}
+
+/* ========================= */
+/* MOBILE NAVBAR */
+/* ========================= */
+
+@media (max-width: 768px) {
+
+  .navbar {
+
+    margin: 0;
+    border-radius: 0;
+    padding: 0 18px;
+    height: 74px;
+    position: sticky;
+    overflow: visible;    
+  }
+
+  .logo-section {
+    width: 100%;
+    display: flex;
+    align-items: center;    
+    gap: 12px;
+  }
+
+  .logo-image {
+    width: 34px;
+    height: 34px;
+  }
+
+  .logo-text {
+    position: static;
+    font-size: 24px;
+    margin-left: 5px;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .links-btn,
+  .logout-btn {
+
+    width: 100%;
+  }
+
+  .links {
+    position: absolute;
+    top: 85px;
+    right: 18px;
+    width: 260px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px;
+    border-radius: 16px;
+    background: rgba(186,186,186,0.97);
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 20px 35px rgba(0,0,0,0.25);
+    z-index: 99999;
+  }
+
+  .links.open {
+
+    display: flex;
+  }
+
+  
+  /* USER */
+
+  .desktop-user {
+
+    display: none;
+  }
+
+  .mobile-user {
+
+    display: flex;
+
+    margin-left: auto;
+  }
+
+  .navbar-user {
+
+    padding: 5px 12px 5px 8px;
+  }
+
+  .navbar-username {
+
+    font-size: 14px;
+  }
 }
 
 </style>
