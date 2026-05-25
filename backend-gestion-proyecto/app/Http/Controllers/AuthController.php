@@ -44,25 +44,61 @@ class AuthController extends Controller
         ]);
     }
 
-    public function register(Request $request)
-        {
-            $request->validate([
-                'name' => 'required|string|max:20|unique:users,name',
+    public function register(Request $request){
 
-                'email' => 'required|email|unique:users,email',
+        $request->validate([
+            'name' => 'required|string|max:20|unique:users,name',
 
-                'password' => 'required|string|min:6|confirmed',
-            ]);
+            'email' => 'required|email|unique:users,email',
+
+            'password' => 'required|string|min:6|confirmed',
+        ]);
 
 
-            $user = new User();
-            $user->name = $request['name'];
-            $user->password = Hash::make($request['password']);
-            $user->email = $request['email'];
-            $user->roles_id = 2;
+        $user = new User();
+        $user->name = $request['name'];
+        $user->password = Hash::make($request['password']);
+        $user->email = $request['email'];
+        $user->roles_id = 2;
 
-            $user->save();
+        $user->save();
 
-            return response()->json(['message' => 'Usuario creado correctamente', 'user' => $user]);
+        return response()->json(['message' => 'Usuario creado correctamente', 'user' => $user]);
+    }
+
+    public function updateProfile(Request $request){
+
+        $user = auth()->user();
+
+        $request->validate([
+
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                'unique:users,name,' . $user->id_user . ',id_user'
+            ],
+
+            'password' =>
+                'nullable|min:6|confirmed'
+        ]);
+
+        $user->name = $request->name;
+
+        if ($request->password) {
+
+            $user->password = Hash::make(
+                $request->password
+            );
         }
+
+        $user->save();
+
+        return response()->json([
+
+            'message' => 'Perfil actualizado',
+
+            'user' => $user
+        ]);
+    }
 }

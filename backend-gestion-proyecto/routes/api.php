@@ -43,4 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
     Route::post('/tasks/reorder', [TaskController::class, 'reorder']);
 
+    // RUTA PERFIL
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+
 });

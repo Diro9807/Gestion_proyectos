@@ -20,7 +20,7 @@
     </div>
 
     <!-- USER SOLO MÓVIL -->
-    <div class="navbar-user mobile-user">
+    <div class="navbar-user mobile-user" @click="$router.push('/profile')">
 
       <div class="navbar-avatar">
         {{ userInitial }}
@@ -63,7 +63,7 @@
     </button>
 
     <!-- USER DESKTOP -->
-    <div class="navbar-user desktop-user">
+    <div class="navbar-user desktop-user" @click="$router.push('/profile')">
 
       <div class="navbar-avatar">
         {{ userInitial }}
@@ -299,13 +299,10 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
-
+  cursor: pointer;
   background: rgba(255, 255, 255, 0.765);
-
   padding: 5px 15px 5px 8px;
-
   border-radius: 999px;
-
   font-family: Poppins;
 }
 
@@ -439,7 +436,7 @@ export default {
   /* USER */
 
   .desktop-user {
-
+    
     display: none;
   }
 

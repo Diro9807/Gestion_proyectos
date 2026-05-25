@@ -5,6 +5,7 @@ import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
 import Dashboard from '../pages/Dashboard.vue'
 import Projects from '../pages/Projects.vue'
+import Profile from '../pages/Profile.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -12,6 +13,7 @@ const routes = [
   { path: '/register', component: Register },
   { path: '/dashboard', component: Dashboard },
   { path: '/projects', component: Projects },
+  { path: '/profile', component: Profile},
 
   {
     path: '/projects/:id',

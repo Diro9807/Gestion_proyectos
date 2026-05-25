@@ -3,7 +3,10 @@
 <template>
   <div class="project-detail">
 
-    <button @click="$router.push('/projects')">⬅ Volver</button>
+    <button class="back-btn" @click="$router.push('/projects')">
+      <span>⬅</span>
+      Volver
+    </button>
 
     <div class="project-header">
 
@@ -550,18 +553,28 @@ button {
 
 /* BOTÓN VOLVER */
 
-.project-detail > button {
+.back-btn {
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: transparent;
+  border: none;
+  box-shadow: none;
   color: white;
-  font-size: 22px;
-  padding: 0;
-  margin-bottom: 25px;
+  padding: 12px 18px;
+  font-family: Poppins;
+  font-size: 25px;
+  font-weight: 600;  
+  margin-bottom: 10px;
+  margin-left: 65px;
 }
 
-.project-detail > button:hover {
-  transform: scale(1.05);
-  cursor: pointer;
+.back-btn:hover { 
+  transform: translateY(-2px); 
+ 
 }
+
 
 
 
