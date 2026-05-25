@@ -16,7 +16,10 @@
 
       </div>
 
-      <ul @mousemove="handleMouseMove" :style="backgroundStyle">
+      <ul @mousemove="handleMouseMove" :style="projects.length ? backgroundStyle : {}" :class="{ 'empty-projects': projects.length === 0 }">
+        <p v-if="projects.length === 0" class="no-projects">
+          No tienes ningún proyecto
+        </p>
         <li 
           v-for="p in projects" :key="p.id_project" @click="openSidebar(p)">
 
@@ -885,17 +888,35 @@ button {
 
 /* GRID DE PROYECTOS */
 ul {
-  margin-top: 25px;
+  margin-top: 35px;
   list-style: none;
   padding: 20px;
   background-color: #bcbcbc;
   box-shadow: 10px 30px 15px rgba(0,0,0,0.25);
   border-radius: 12px;
   display: grid;
-  grid-template-columns: repeat(4, 350px); 
-  gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 350px));
-  justify-content: center; 
+  grid-template-columns: repeat(auto-fill, minmax(300px, 350px));
+  gap: 25px;
+  justify-content: start;
+}
+
+/* CUANDO NO HAY PROYECTOS */
+
+ul.empty-projects {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  min-height: auto;
+}
+
+.no-projects {
+  margin-top: 40px;
+  text-align: center;
+  font-family: Poppins;
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+  opacity: 0.8;
 }
 
 /* CARD PROYECTO */
@@ -903,7 +924,8 @@ li {
   background: #D9D9D9;
   margin-top: 20px;
   margin-bottom: 20px;
-  padding: 20px;
+  margin-left: 120px;
+  padding: 20px 25px;
   height: 200px;
   width: 330px;
   border-radius: 12px;
