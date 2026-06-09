@@ -8,7 +8,7 @@ class Task extends Model
 {
     protected $table = 'tasks';
     protected $primaryKey = 'id_task';
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'name',
@@ -19,7 +19,7 @@ class Task extends Model
         'status',
         'user_id',
         'project_task_id',
-        'user_id'
+        'position'
     ];
 
     public function user()

@@ -420,7 +420,9 @@ export default {
         console.log(project)
         console.log('USUARIOS AÑADIDOS:', this.newProjectUsers)
 
-        for (const user of this.newProjectUsers) {
+        for (const user of this.newProjectUsers.filter(
+              u => !u.fixed
+            )) {
 
           await fetch(
             `http://127.0.0.1:8000/api/projects/${project.id_project}/users`,

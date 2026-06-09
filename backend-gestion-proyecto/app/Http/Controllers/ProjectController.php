@@ -100,7 +100,7 @@ class ProjectController extends Controller
 
             $request->validate([
                 'user_id' => 'required|exists:users,id_user',
-                'role' => 'nullable|in:admin,member'
+                'role' => 'nullable|in:owner,admin,member'
             ]);
 
             $alreadyExists = $project->users()
@@ -192,7 +192,7 @@ class ProjectController extends Controller
         $project = Project::findOrFail($projectId);
 
         $request->validate([
-            'role' => 'required|in:admin,member'
+            'role' => 'required|in:owner,admin,member'
         ]);
 
         if ($response = $this->checkProjectOwner($project)) {
