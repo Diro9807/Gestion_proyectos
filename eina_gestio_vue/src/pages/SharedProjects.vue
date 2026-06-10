@@ -5,20 +5,13 @@
 
       <div class="projects-header">
 
-        <h1>/MY-Projects</h1>
-
-        <button
-          class="create-project-btn"
-          @click="openCreateModal"
-        >
-          + Nuevo Proyecto
-        </button>
+        <h1>/Proyectos-Compartidos</h1>
 
       </div>
 
       <ul @mousemove="handleMouseMove" :style="projects.length ? backgroundStyle : {}" :class="{ 'empty-projects': projects.length === 0 }">
         <p v-if="projects.length === 0" class="no-projects">
-          No tienes ningún proyecto
+          No te han compartido ningún proyecto
         </p>
         <li 
           v-for="p in projects" :key="p.id_project" @click="openSidebar(p)">
@@ -99,13 +92,13 @@
           <button class="close-sidebar" @click="closeSidebar">❌</button>
 
           <input
-            v-model="sidebarProject.name"
+            v-model="sidebarProject.name" disabled
             class="sidebar-title-input"
             @input="debouncedSaveProject"
           />
 
           <textarea
-            v-model="sidebarProject.description"
+            v-model="sidebarProject.description" disabled
             class="sidebar-description-input"
             placeholder="Añadir descripción..."
             @input="debouncedSaveProject"
@@ -134,6 +127,7 @@
               >
                 {{ u.name }}
               </option>
+
             </select>
 
             <button @click="addUserToProject">
@@ -159,7 +153,12 @@
                   
 
                   <div class="remove-user">
-                    <button class="remove-user-btn" @click="removeUserFromProject(u.id_user)">❌</button>
+                    <button
+                      class="remove-user-btn"
+                      @click.stop="removeUserFromProject(u.id_user)"
+                    >
+                      ❌
+                    </button>
                   </div>
 
                 </div>
@@ -208,14 +207,12 @@
               </option>
 
               <option
-                v-for="u in users.filter(
-                  user => Number(user.id_user) !== Number(currentUser?.id_user)
-                )"
+                v-for="u in users"
                 :key="u.id_user"
                 :value="u.id_user"
               >
                 {{ u.name }}
-              </option>          
+              </option>            
 
             </select>
             
@@ -232,17 +229,8 @@
               :key="u.id_user"
               class="selected-user">
               {{ u.name }}
-                <span
-                  v-if="u.fixed"
-                  class="owner-badge"
-                >
-                  OWNER
-                </span>
 
-              <button
-                v-if="!u.fixed"
-                @click="removeUserFromNewProject(u.id_user)"
-              >
+              <button @click="removeUserFromNewProject(u.id_user)">
                 ❌
               </button>
             </span>
@@ -254,12 +242,11 @@
 
         </div>
       </div>
-    <!-- ERROR POPUP -->
+      <!-- ERROR POPUP -->
     <div v-if="showError" class="error-popup">
       {{ errorMessage }}
     </div>
-  </div>
-  
+  </div>  
 </template>
 
 <script>
@@ -270,7 +257,6 @@ export default {
       description: '',
       projects: [], 
 
-      currentUser: null,
       tasks: {},
       newTask: {},
       editingTaskId: null,
@@ -280,7 +266,7 @@ export default {
       sidebarProject: null,
       saveTimeout: null,
 
-      users: [],      
+      users: [],
       selectedUserId: '',
 
       showCreateModal: false,
@@ -291,6 +277,7 @@ export default {
 
       mouseX: '50%',
       mouseY: '50%',
+
     }    
   },
 
@@ -318,15 +305,6 @@ export default {
   },
 
   mounted() {
-
-    const storedUser = localStorage.getItem('auth_user')
-
-    if (storedUser) {
-      this.currentUser = JSON.parse(storedUser)
-    }
-
-    console.log('CURRENT USER:', this.currentUser)
-
     this.loadProjects()
     this.loadUsers()
   },
@@ -341,23 +319,8 @@ export default {
     closeProject() {
       this.selectedProject = null
     },
-    openCreateModal() {
 
-      this.showCreateModal = true
-
-      const currentUser = this.currentUser
-
-      this.newProjectUsers = [
-        {
-          id_user: currentUser.id_user,
-          name: currentUser.name || currentUser.username,
-          fixed: true,
-          role: 'owner'
-        }
-      ]
-    },
-
-    //////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
     async loadProjects() {
 
       console.log('Cargando proyectos...')
@@ -368,7 +331,7 @@ export default {
         this.$router.push('/login')
         return
       }
-      const res = await fetch('http://127.0.0.1:8000/api/owned-projects', {
+      const res = await fetch('http://127.0.0.1:8000/api/shared-projects', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -382,6 +345,11 @@ export default {
     },
 ////////////////////////////////////////////////////////////////////////////////////////////
     async createProject() {
+
+      if (this.$route.path === '/shared-projects') {
+        this.$router.push('/projects')
+        return
+      }
 
       try {
 
@@ -418,11 +386,8 @@ export default {
         const project = await res.json();
 
         console.log(project)
-        console.log('USUARIOS AÑADIDOS:', this.newProjectUsers)
 
-        for (const user of this.newProjectUsers.filter(
-              u => !u.fixed
-            )) {
+        for (const user of this.newProjectUsers) {
 
           await fetch(
             `http://127.0.0.1:8000/api/projects/${project.id_project}/users`,
@@ -436,7 +401,7 @@ export default {
 
               body: JSON.stringify({
                 user_id: user.id_user,
-                role: user.fixed ? 'owner' : 'member',
+                role: 'member',
               }),
             }
           )
@@ -468,14 +433,18 @@ export default {
 
         if (!response.ok) {
           const error = await response.json();
-          throw new Error(error.message || 'Error al eliminar el proyecto');
+          throw new Error(error.message || 'No autorizado');
         }
 
           // opcional: actualizar UI
         console.log('Proyecto eliminado correctamente');
         this.loadProjects();
+
       } catch (error) {
         console.error('Error deleting project:', error.message);
+
+        this.showErrorPopup(error.message)
+
       }
     },
 
@@ -565,7 +534,7 @@ export default {
         console.error('Error actualizando tarea:', error)
       }
     },
-////////////////////////////////////SIDEBAR//////////////////////////////////////////////////////// 
+//////////////////////////////////////////////////////////////////////////////////////////// 
     openSidebar(project) {
       this.sidebarProject = project
     },
@@ -628,30 +597,17 @@ export default {
         this.selectedUserId = ''
       },
 
-/////////////////////////////////////////////////////////////////////
       addUserToNewProject() {
 
         if (!this.selectedUserId) return
 
         const user = this.users.find(
-          u => Number(u.id_user) === Number(this.selectedUserId)
+          u => u.id_user == this.selectedUserId
         )
-
-        // SI NO EXISTE EL USER
-        if (!user) {
-          console.error('Usuario no encontrado')
-          return
-        }
 
         const exists = this.newProjectUsers.some(
           u => u.id_user === user.id_user
         )
-
-        const currentUser = JSON.parse(localStorage.getItem('auth_user') || 'null')
-
-        if (currentUser?.id_user === user.id_user) {
-          return
-        }
 
         if (!exists) {
           this.newProjectUsers.push(user)
@@ -659,7 +615,7 @@ export default {
 
         this.selectedUserId = ''
       },
-//////////////////////////////////////////////////////////////////////////////
+
       removeUserFromNewProject(userId) {
         this.newProjectUsers =
           this.newProjectUsers.filter(
@@ -690,28 +646,21 @@ export default {
             }
           )
 
-          const data = await response.json()
-
-          console.log(data)
-
           if (!response.ok) {
-            this.showErrorPopup(data.message)
+
+            const error = await response.json()
+
+            this.showErrorPopup(error.message)
+
             return
           }
 
-          // RECARGAR PROYECTOS
           await this.loadProjects()
 
-          // RECARGAR SIDEBAR
-          const updatedProject = this.projects.find(
+          this.sidebarProject = this.projects.find(
             p => p.id_project === this.sidebarProject.id_project
           )
 
-          if (updatedProject) {
-            this.sidebarProject = updatedProject
-          }
-
-          // RESET SELECT
           this.selectedUserId = ''
 
         } catch (error) {
@@ -720,10 +669,9 @@ export default {
 
           this.showErrorPopup('Error inesperado')
         }
-      },
+      }, 
 ///////////////////////////////////////////////////////////////
     async removeUserFromProject(userId) {
-
       try {
 
         const response = await fetch(
@@ -752,9 +700,11 @@ export default {
 
       } catch (error) {
 
+        console.error(error)
+
         this.showErrorPopup('Error inesperado')
       }
-    },  
+    },
 /////////////////////////////////////////////////////////////////////////////
     async changeRole(userId, event) {
       await fetch(
@@ -870,7 +820,6 @@ button {
   color: white;
   font-size: 50px;
 }
-
 /* BOTÓN CREAR */
 .create-project-btn {
   background: #FE9F5B;
@@ -928,6 +877,23 @@ li {
   margin-bottom: 20px;
   margin-left: 120px;
   padding: 20px 25px;
+  height: 200px;
+  width: 330px;
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: 0.25s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* CARD PROYECTO */
+li {
+  background: #D9D9D9;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 20px;
   height: 200px;
   width: 330px;
   border-radius: 12px;
@@ -1412,7 +1378,7 @@ li button:first-child:hover {
 }
 
 .create-modal {
-  width: 550px;
+  width: 500px;
   background: #d9d9d9;
   border-radius: 12px;
   padding: 35px;
@@ -1510,25 +1476,18 @@ li button:first-child:hover {
 
 .error-popup {
   position: fixed;
-
   bottom: 30px;
   right: 30px;
-
   background: #ef4444;
   color: white;
-
   padding: 14px 20px;
-
   border-radius: 12px;
-
   font-family: Poppins;
   font-weight: 600;
-
   box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-
   z-index: 999999;
-
   animation: popupFade 0.3s ease;
+  pointer-events: none;
 }
 
 @keyframes popupFade {
@@ -1542,15 +1501,6 @@ li button:first-child:hover {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.owner-badge {
-  background: #facc15;
-  color: #713f12;
-  padding: 3px 8px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: bold;
 }
 
 </style>

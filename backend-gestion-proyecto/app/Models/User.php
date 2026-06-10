@@ -12,9 +12,7 @@ class User extends Authenticatable
     use HasApiTokens;
 
     protected $table = 'users';
-
     protected $primaryKey = 'id_user';
-
     public $timestamps = true;
 
     protected $fillable = [
@@ -23,6 +21,10 @@ class User extends Authenticatable
         'password',
         'roles_id'
     ];
+    public function getAuthIdentifierName(){
+
+        return 'id_user';
+    }
 
     public function role()
     {
@@ -31,20 +33,21 @@ class User extends Authenticatable
 
     public function projects()
     {
-        return $this->belongsToMany(Project::class,'project_users','user_id','project_id','id_user','id_project')->withPivot('role');
+        return $this->belongsToMany(
+            Project::class,
+            'project_users',
+            'user_id',
+            'project_id',
+            'id_user',
+            'id_project'
+        )->withPivot('role');
     }
-
     public function tasks()
     {
         return $this->hasMany(Task::class, 'user_id', 'id_user');
     }
-}
-// USUARIOS //
 
-// email: a@gmail.com pass: 1234567
-// email: b@gmail.com pass: 1234567
-// email: c@gmail.com pass: 1234567
-// email: d@gmail.com pass: 1234567
-// email: e@gmail.com pass: 1234567
-// email: f@gmail.com pass: 1234567
-// email: g@gmail.com pass: 1234567
+
+}
+
+

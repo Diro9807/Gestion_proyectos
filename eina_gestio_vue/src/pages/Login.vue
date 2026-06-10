@@ -1,16 +1,26 @@
 <template>
-  <div class="register-container">
+  <div class="register-container" @mousemove="handleMouseMove" :style="backgroundStyle">
 
     <div class="left-panel">
-      <div class="logo-container">
-        <img src="/logo.png" alt="Logo" class="logo" />
-      </div>      
+      <div
+        class="logo-container"
+        @click="showCard = !showCard"
+      >
+        <img
+          src="/logo.png"
+          alt="Logo"
+          class="logo"
+        />
+      </div>  
+
       <h1>Welcome to Projects</h1>
       
     </div>
 
     <div class="right-panel">
-      <form class="register-card" @submit.prevent="loginUser">
+      <form v-if="!isMobile || showCard"
+        class="register-card"
+        @submit.prevent="loginUser">
 
         <h2>Iniciar Sesión</h2>
 
@@ -52,10 +62,66 @@ export default {
       },
       sending: false,
       error: '',
+      showCard: false,
+      isMobile: window.innerWidth <= 768,
+
+      mouseX: '50%',
+      mouseY: '50%',
+    }
+  },
+  computed: {
+
+    backgroundStyle() {
+
+      return {
+        background: `
+          radial-gradient(
+            circle 3000px at ${this.mouseX} ${this.mouseY},
+            rgba(109,151,214,0.55),
+            rgba(53,92,155,0.15),
+            transparent 80%
+          ),
+          linear-gradient(
+            135deg,
+            #07173f,
+            #0f2f70,
+            #07173f
+          )
+        `
+      }
     }
   },
 
+  mounted() {
+
+    window.addEventListener(
+      'resize',
+      this.checkScreen
+    )
+
+    this.checkScreen()
+  },
+
+  beforeUnmount() {
+
+    window.removeEventListener(
+      'resize',
+      this.checkScreen
+    )
+  },
+
   methods: {
+    checkScreen() {
+
+      this.isMobile =
+        window.innerWidth <= 768
+
+      if (!this.isMobile) {
+
+        this.showCard = true
+      }
+    },
+
     async loginUser() {
       if (!this.user.email || !this.user.password) {
         this.error = 'Completa todos los campos'
@@ -84,7 +150,9 @@ export default {
 
         localStorage.setItem('auth_token', data.access_token)
         localStorage.setItem('auth_user', JSON.stringify(data.user))
-        
+
+        window.dispatchEvent(new Event('auth-changed'))
+
         this.$router.push('/projects')
 
       } catch (error) {
@@ -93,16 +161,26 @@ export default {
         this.sending = false
       }
     },
+
+    handleMouseMove(e) {
+
+      this.mouseX = `${(e.clientX / window.innerWidth) * 100}%`
+      this.mouseY = `${(e.clientY / window.innerHeight) * 100}%`
+    },
   },
 }
 </script>
 
 <style>
+
+
 .register-container {
   height: 100vh;
   display: flex;
-  font-family: Arial, sans-serif;
-  
+  justify-content: center;
+  align-items: center;
+  font-family: Poppins;  
+  transition: background 0.08s linear;
 }
 
 /* IZQUIERDA */
@@ -137,7 +215,13 @@ export default {
 
 /* CARD */
 .register-card {
-  background: white;
+  background: #d9d9d9;
+
+  backdrop-filter: blur(10px);
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
   padding: 35px;
   border-radius: 12px;
   width: 450px;
@@ -145,6 +229,37 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  animation: fadeCard 0.35s ease;
+}
+
+@keyframes fadeCard {
+
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.logo-container {
+  cursor: pointer;
+
+  transition: transform 0.25s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.05);
+}
+
+.register-card:hover {
+  transform: translateY(-8px);
+
+  box-shadow:
+    0 25px 45px rgba(0,0,0,0.55);
 }
 
 .register-card h2 {
@@ -182,5 +297,50 @@ export default {
 .error {
   color: red;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+
+  .register-container {
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .left-panel {
+    flex: unset;
+    margin-top: 40px;
+    gap: 5px;
+  }
+
+  .left-panel h1 {
+    font-size: 36px;
+    text-align: center;
+  }
+
+  .logo {
+    width: 180px;
+  }
+
+  .right-panel {
+    width: 100%;
+    flex: unset;
+    margin-top: 25px;
+  }
+
+  .register-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 25px;
+    margin-bottom: 30px;
+  }
+
+  .form-group input {
+    font-size: 16px;
+  }
+
+  .btn {
+    width: 100%;
+  }
 }
 </style>
