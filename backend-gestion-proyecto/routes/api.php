@@ -17,7 +17,6 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->group(function () {
 
     // RUTAS USUARIOS
-    Route::get('/user', [AuthController::class, 'index']);
     Route::get('/users', [AuthController::class, 'index']);
 
     // RUTAS ROLES
