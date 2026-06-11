@@ -263,6 +263,7 @@
 </template>
 
 <script>
+import { API_URL } from '@/config'
 export default {
   data() {    
     return {
@@ -368,7 +369,7 @@ export default {
         this.$router.push('/login')
         return
       }
-      const res = await fetch('http://127.0.0.1:8000/api/owned-projects', {
+      const res = await fetch(`${API_URL}/owned-projects`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -387,8 +388,7 @@ export default {
 
         console.log('CREANDO PROYECTO')
 
-        const res = await fetch(
-          'http://127.0.0.1:8000/api/projects',
+        const res = await fetch( `${API_URL}/projects`,
           {
             method: 'POST',
             headers: {
@@ -424,8 +424,7 @@ export default {
               u => !u.fixed
             )) {
 
-          await fetch(
-            `http://127.0.0.1:8000/api/projects/${project.id_project}/users`,
+          await fetch(`${API_URL}/projects/${project.id_project}/users`,
             {
               method: 'POST',
               headers: {
@@ -458,7 +457,7 @@ export default {
         if (!confirmed) return
 
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/projects/${id}`, {
+        const response = await fetch(`${API_URL}/projects/${id}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
@@ -485,7 +484,7 @@ export default {
     async loadTasks(projectId) {
 
       console.log('Cargando tareas...')
-        const res = await fetch(`http://127.0.0.1:8000/api/projects/${projectId}/tasks`, {
+        const res = await fetch(`${API_URL}/projects/${projectId}/tasks`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
           },
@@ -497,7 +496,7 @@ export default {
     async createTask(projectId) {
       console.log('VALOR TASK:', this.newTask[projectId])
 
-      await fetch('http://127.0.0.1:8000/api/tasks', {
+      await fetch(`${API_URL}/tasks`,{
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -515,7 +514,7 @@ export default {
 ////////////////////////////////////////////////////////////////////////////////////////////    
     async deleteTask(id, projectId) {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/tasks/${id}`, {
+        const response = await fetch(`${API_URL}/tasks/${id}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
@@ -547,7 +546,7 @@ export default {
 ////////////////////////////////////////////////////////////////////////////////////////////  
     async updateTask(id, projectId) {      
       try {
-        await fetch(`http://127.0.0.1:8000/api/tasks/${id}`, {
+        await fetch(`${API_URL}/tasks/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -582,7 +581,7 @@ export default {
 ///////////////////////////////////////////////////////////////////////
     async autoSaveProject() {
       try {
-        await fetch(`http://127.0.0.1:8000/api/projects/${this.sidebarProject.id_project}`, {
+        await fetch(`${API_URL}/projects/${this.sidebarProject.id_project}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -611,7 +610,7 @@ export default {
     },
 /////////////////////////////////////////////////////////////////////////////
       async loadUsers() {
-        const res = await fetch('http://127.0.0.1:8000/api/users', {
+        const res = await fetch(`${API_URL}/users`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -674,8 +673,7 @@ export default {
 
         try {
 
-          const response = await fetch(
-            `http://127.0.0.1:8000/api/projects/${this.sidebarProject.id_project}/users`,
+          const response = await fetch(`${API_URL}/projects/${this.sidebarProject.id_project}/users`,
             {
               method: 'POST',
               headers: {
@@ -726,8 +724,7 @@ export default {
 
       try {
 
-        const response = await fetch(
-          `http://127.0.0.1:8000/api/projects/${this.sidebarProject.id_project}/users/${userId}`,
+        const response = await fetch(`${API_URL}/projects/${this.sidebarProject.id_project}/users/${userId}`,
           {
             method: 'DELETE',
             headers: {
@@ -757,8 +754,7 @@ export default {
     },  
 /////////////////////////////////////////////////////////////////////////////
     async changeRole(userId, event) {
-      await fetch(
-        `http://127.0.0.1:8000/api/projects/${this.sidebarProject.id_project}/users/${userId}/role`,
+      await fetch(`${API_URL}/projects/${this.sidebarProject.id_project}/users/${userId}/role`,
         {
           method: 'PUT',
           headers: {

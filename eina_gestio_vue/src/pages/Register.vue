@@ -40,8 +40,9 @@
 </template>
 
 <script>
+import { API_URL } from '@/config'
 export default {
-  name: 'RegisterComponent',
+  name: 'RegisterComponent',  
 
   data() {
     return {
@@ -108,7 +109,7 @@ export default {
       try {
         console.log('📝 [REGISTER] Enviando datos...')
 
-        const response = await fetch('http://127.0.0.1:8000/api/register', {
+        const response = await fetch(`${API_URL}/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -108,6 +108,9 @@
 </template>
 
 <script>
+
+import { API_URL } from '@/config'
+
 export default {
 
   name: 'ProfilePage',
@@ -147,9 +150,7 @@ export default {
 
       try {
 
-        const response = await fetch(
-          'http://127.0.0.1:8000/api/profile',
-          {
+        const response = await fetch(`${API_URL}/profile`, {
             method: 'PUT',
 
             headers: {

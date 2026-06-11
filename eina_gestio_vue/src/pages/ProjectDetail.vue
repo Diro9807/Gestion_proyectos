@@ -254,6 +254,8 @@
 
 <script>
 import draggable from 'vuedraggable'
+import { API_URL } from '@/config'
+
 export default {
   
   components: {
@@ -307,9 +309,8 @@ export default {
         return
       }
 
-      const res = await fetch(
-        `http://127.0.0.1:8000/api/projects/${this.projectId}/tasks`,
-        {
+      const res = await fetch(`${API_URL}/projects/${this.projectId}/tasks`, {
+
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -334,7 +335,7 @@ export default {
 
       console.log('Nueva task:', this.newTask)
 
-      await fetch('http://127.0.0.1:8000/api/tasks', {
+      await fetch(`${API_URL}/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -367,7 +368,7 @@ export default {
         if (!confirmed) return
       try {
 
-        await fetch(`http://127.0.0.1:8000/api/tasks/${id}`, {
+        await fetch(`${API_URL}/tasks/${id}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
@@ -396,7 +397,7 @@ export default {
     async updateTask(task) {
       try {
 
-        await fetch(`http://127.0.0.1:8000/api/tasks/${task.id_task}`, {
+        await fetch(`${API_URL}/tasks/${task.id_task}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -425,8 +426,7 @@ export default {
 
       try {
 
-        const res = await fetch(
-          `http://127.0.0.1:8000/api/projects`,
+        const res = await fetch(`${API_URL}/projects`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
@@ -473,8 +473,7 @@ export default {
           position: index
         }))
 
-        await fetch(
-          'http://127.0.0.1:8000/api/tasks/reorder',
+        await fetch(`${API_URL}/tasks/reorder`,
           {
             method: 'POST',
 
