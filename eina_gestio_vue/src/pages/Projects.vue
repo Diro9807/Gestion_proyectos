@@ -102,6 +102,7 @@
             v-model="sidebarProject.name"
             class="sidebar-title-input"
             @input="debouncedSaveProject"
+            maxlength="20"
           />
 
           <textarea
@@ -109,6 +110,7 @@
             class="sidebar-description-input"
             placeholder="Añadir descripción..."
             @input="debouncedSaveProject"
+            maxlength="500"
           ></textarea>
 
           <div class="sidebar-info">
@@ -194,7 +196,7 @@
 
           <h2>Creando Proyecto...</h2>
 
-          <input v-model="name"placeholder="Nombre del proyecto"/>
+          <input maxlength="20" v-model="name"placeholder="Nombre del proyecto" />
 
           <textarea v-model="description" placeholder="Descripción del proyecto" class="create-description"></textarea>
 
@@ -889,12 +891,17 @@ ul {
   margin-top: 35px;
   list-style: none;
   padding: 20px;
+
   background-color: #bcbcbc;
   box-shadow: 10px 30px 15px rgba(0,0,0,0.25);
   border-radius: 12px;
+
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 350px));
+
+  grid-template-columns: repeat(auto-fill, 320px);
+
   gap: 25px;
+
   justify-content: start;
 }
 
@@ -922,7 +929,9 @@ li {
   background: #D9D9D9;
   margin-top: 20px;
   margin-bottom: 20px;
-  margin-left: 120px;
+  margin-left: 0;
+  width: 100%;
+  max-width: 330px;
   padding: 20px 25px;
   height: 200px;
   width: 330px;
@@ -1547,6 +1556,130 @@ li button:first-child:hover {
   border-radius: 999px;
   font-size: 10px;
   font-weight: bold;
+}
+
+
+/* ===================================== */
+/* RESPONSIVE MOVIL */
+/* ===================================== */
+
+@media (max-width: 768px) {
+
+  .Projects-content {
+    padding: 10px;
+  }
+
+  .projects-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    height: auto;
+  }
+
+  .projects-header h1 {
+    font-size: 40px;
+    line-height: 1.1;
+  }
+
+  .create-project-btn {
+    width: 100%;
+  }
+
+  ul {
+    padding: 15px;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-content: center;
+  }
+
+  li {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0px;
+    margin-top: 0;
+    margin-bottom: 0;
+    height: 200px;
+    box-sizing: border-box;
+  }
+
+  
+
+  .project-sidebar {
+    width: 100%;
+    height: calc(100vh - 80px);
+    margin-top: 80px;
+    margin-right: 0;
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+  }
+
+  .close-sidebar {
+    top: 15px;
+    right: 15px;
+  }
+
+  .sidebar-info {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sidebar-users {
+    padding: 20px 0px 10px 25px;
+  }
+
+
+  .users-list {
+    width: 100%;
+  }
+
+  .user-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: unset;
+  }
+
+  .remove-user{
+    position:absolute;
+    top: -20%;
+    left: 80%;
+  }
+
+
+  .add-user-section {
+    flex-direction: column;
+    margin-right: 0;
+    padding-right: 0;
+  }
+
+  .add-user-section button {
+    width: 100%;
+  }
+
+  .open-project-btn {
+    position: static;
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .create-modal {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .confirm-create-btn {
+    margin: 0;
+    width: 100%;
+  }
+
+  .create-users-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .create-users-section button {
+    width: 100%;
+  }
+
 }
 
 </style>

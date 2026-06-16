@@ -884,22 +884,6 @@ li {
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* CARD PROYECTO */
-li {
-  background: #D9D9D9;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  padding: 20px;
-  height: 200px;
-  width: 330px;
-  border-radius: 12px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: 0.25s;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
 
 /* HOVER CARD */
 li:hover {
@@ -1498,5 +1482,117 @@ li button:first-child:hover {
     transform: translateY(0);
   }
 }
+
+/* ================================= */
+/* RESPONSIVE MOVIL */
+/* ================================= */
+
+@media (max-width: 768px) {
+
+  .Projects-content {
+    padding: 15px;
+  }
+
+  .projects-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    height: auto;
+  }
+
+  .projects-header h1 {
+    font-size: 28px;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .create-project-btn {
+    width: 100%;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    gap: 15px;
+  }
+
+  li {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    height: auto;
+    min-height: 180px;
+  }
+
+  .project-title {
+    font-size: 20px;
+  }
+
+  .project-sidebar {
+    width: 100%;
+    height: calc(100vh - 70px);
+    margin: 70px 0 0 0;
+    border-radius: 12px 12px 0 0;
+    padding: 20px;
+  }
+  .close-sidebar {
+    top: 15px;
+    right: 15px;
+  }
+
+  .sidebar-info {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sidebar-users {
+    padding: 20px 0px 10px 25px;
+  }
+
+
+  .users-list {
+    width: 100%;
+  }
+
+  .user-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: unset;
+  }
+
+  .remove-user{
+    position:absolute;
+    top: -20%;
+    left: 80%;
+  }
+
+  .add-user-section {
+    flex-direction: column;
+    margin-right: 0;
+    padding-right: 0;
+  }
+
+  .add-user-section button {
+    width: 100%;
+  }
+
+  .create-modal {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .confirm-create-btn {
+    margin: 0;
+    width: 100%;
+  }
+
+  .open-project-btn {
+    position: static;
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+
 
 </style>

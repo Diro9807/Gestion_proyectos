@@ -57,6 +57,7 @@
               ghost-class="sortable-ghost"
               drag-class="sortable-drag"
               chosen-class="sortable-chosen"
+              handle=".drag-handle"
             >
               <template #item="{ element: t }">
 
@@ -65,85 +66,121 @@
                   <div class="task-content">
 
                     <!-- NOMBRE -->
-                    <input
-                      v-model="t.name"
-                      class="task-title-input"
-                      @change="updateTask(t)"
-                    />
+                    <div class="mobile-section">                      
+
+                      <input
+                        v-model="t.name"
+                        class="task-title-input"
+                        @change="updateTask(t)"
+                        maxlength="25"
+                      />
+                    </div>
 
                     <!-- DESCRIPCIÓN -->
-                    <textarea
-                      v-model="t.description"
-                      placeholder="Descripción"
-                      class="task-description"
-                      @change="updateTask(t)"
-                    ></textarea>
+                    <div class="mobile-section">
+                      
 
-                    <!-- USER -->
-                    <select
-                      v-model="t.user_id"
-                      @change="updateTask(t)"
-                    >
-                      <option :value="null">Sin asignar</option>
+                      <textarea
+                        v-model="t.description"
+                        placeholder="Descripción"
+                        class="task-description"
+                        @change="updateTask(t)"
+                        maxlength="500"
+                      ></textarea>
+                    </div>
 
-                      <option
-                        v-for="u in users"
-                        :key="u.id_user"
-                        :value="u.id_user"
+                    <!-- RESPONSABLE -->
+                    <div class="mobile-section">
+                      <label class="mobile-label">Responsable</label>
+
+                      <select
+                        v-model="t.user_id"
+                        @change="updateTask(t)"
                       >
-                        {{ u.name }}
-                      </option>
-                    </select>
+                        <option :value="null">
+                          Sin asignar
+                        </option>
 
-                    <!-- FECHAS -->
-                    <input
-                      type="date"
-                      v-model="t.start_date"
-                      class="task-date-input"
-                      @change="updateTask(t)"
-                      :min="minDate"
-                    />
+                        <option
+                          v-for="u in users"
+                          :key="u.id_user"
+                          :value="u.id_user"
+                        >
+                          {{ u.name }}
+                        </option>
+                      </select>
+                    </div>
 
-                    <input
-                      type="date"
-                      v-model="t.end_date"
-                      class="task-date-input"
-                      @change="updateTask(t)"
-                      :min="minDate"
-                    />
+                    <!-- FECHA INICIO -->
+                    <div class="mobile-section">
+                      <label class="mobile-label">Fecha inicio</label>
 
-                    <input
-                      type="date"
-                      v-model="t.due_date"
-                      class="task-date-input"
-                      @change="updateTask(t)"
-                      :min="minDate"
-                    />
+                      <input
+                        type="date"
+                        v-model="t.start_date"
+                        class="task-date-input"
+                        @change="updateTask(t)"
+                        :min="minDate"
+                      />
+                    </div>
+
+                    <!-- FECHA FIN -->
+                    <div class="mobile-section">
+                      <label class="mobile-label">Fecha fin</label>
+
+                      <input
+                        type="date"
+                        v-model="t.end_date"
+                        class="task-date-input"
+                        @change="updateTask(t)"
+                        :min="minDate"
+                      />
+                    </div>
+
+                    <!-- FECHA LÍMITE -->
+                    <div class="mobile-section">
+                      <label class="mobile-label">Fecha límite</label>
+
+                      <input
+                        type="date"
+                        v-model="t.due_date"
+                        class="task-date-input"
+                        @change="updateTask(t)"
+                        :min="minDate"
+                      />
+                    </div>
 
                     <!-- ESTADO -->
-                    <select
-                      v-model="t.status"
-                      @change="updateTask(t)"
-                      :class="t.status"
-                    >
-                      <option value="none">-</option>
-                      <option value="pending">Pendiente</option>
-                      <option value="in_progress">En progreso</option>
-                      <option value="review">En revisión</option>
-                      <option value="approved">Aprobada</option>
-                      <option value="completed">Completada</option>
-                    </select>
+                    <div class="mobile-section">
+                      <label class="mobile-label">Estado</label>
 
-                    <!-- BOTONES -->
+                      <select
+                        v-model="t.status"
+                        @change="updateTask(t)"
+                        :class="t.status"
+                      >
+                        <option value="none">-</option>
+                        <option value="pending">Pendiente</option>
+                        <option value="in_progress">En progreso</option>
+                        <option value="review">En revisión</option>
+                        <option value="approved">Aprobada</option>
+                        <option value="completed">Completada</option>
+                      </select>
+                    </div>
+
+                    <!-- ELIMINAR -->
                     <div class="task-actions">
-
+                      <span class="drag-handle">
+                        ☰
+                      </span>
                       <button @click="deleteTask(t.id_task)">
                         ❌
                       </button>
-
                     </div>
-                </div>
-              </li>
+
+                  </div>
+
+                </li>
             </template>
           </draggable>
         </ul>
@@ -171,12 +208,14 @@
       <input
         v-model="newTask"
         placeholder="Nombre de la tarea"
+        maxlength="25"
       />
 
       <textarea
         v-model="newDescription"
         placeholder="Descripción"
         class="create-description"
+        maxlength="500"
       ></textarea>
 
       <div class="dates-grid">
@@ -729,6 +768,19 @@ select {
   align-items: center;
 }
 
+/* DARGGEABLE */
+.drag-handle{
+  cursor: grab;
+  font-size: 20px;
+  color: #64748b;
+  user-select: none;
+  padding: 4px 8px;
+}
+
+.drag-handle:active{
+  cursor: grabbing;
+}
+
 /* BOTÓN ELIMINAR */
 .task-actions button {
   background: transparent;
@@ -942,6 +994,10 @@ li.completed {
 
 .create-modal {
   width: 550px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+
   background: #d9d9d9;
   border-radius: 14px;
   padding: 35px;
@@ -1024,5 +1080,128 @@ li.completed {
 
 .sortable-chosen {
   cursor: grabbing;
+}
+
+.mobile-label{
+  display:none;
+}
+
+.mobile-section{
+  display:contents;
+}
+
+
+@media (max-width: 768px) {
+
+  .project-detail{
+    padding:15px;
+  }
+
+  .back-btn{
+    margin-left:0;
+    font-size:18px;
+  }
+
+  .project-header{
+    flex-direction:column;
+    align-items:flex-start;
+    margin:20px 0;
+    gap:15px;
+  }
+
+  .project-title{
+    font-size:22px;
+    line-height:1.2;
+    word-break:break-word;
+  }
+
+  .tasks-topbar{
+    width:100%;
+  }
+
+  .create-task-btn{
+    width:100%;
+  }
+
+  .tasks-header{
+    display:none;
+  }
+
+  .complet-grid{
+    margin:0;
+    background:transparent;
+  }
+
+  .table-wrapper{
+    overflow:visible;
+  }
+
+  ul{
+    padding:0;
+  }
+
+  li{
+    width:100%;
+    min-width:unset;
+    padding:15px;
+    margin-bottom:16px;
+  }
+
+  .task-content{
+    display:flex;
+    flex-direction:column;
+    width:100%;
+    gap:12px;
+    align-items:stretch;
+  }
+
+  .task-title-input{
+    font-size:18px;
+  }
+
+  .task-description,
+  .task-date-input,
+  select{
+    width:100%;
+  }
+  .task-description {
+    min-height: 120px;
+  }
+
+  .task-actions{
+    justify-content:flex-end;
+    margin-left:0;
+    position: absolute;
+    right: 7%;
+  }
+
+  .create-modal{
+    width:95vw;
+    max-height:85vh;
+    padding:20px;
+  }
+
+  .dates-grid{
+    grid-template-columns:1fr;
+  }
+
+  .confirm-create-btn{
+    width:100%;
+    margin:0;
+  }
+
+  .mobile-section{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .mobile-label{
+    display:block;
+    font-family:Poppins;
+    font-size:13px;
+    font-weight:600;
+    color:#475569;
+  }
 }
 </style>

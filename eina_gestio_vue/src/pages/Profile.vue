@@ -38,6 +38,7 @@
           <input
             v-model="form.name"
             type="text"
+            maxlength="25"
           />
 
         </div>
@@ -51,6 +52,7 @@
             v-model="form.password"
             type="password"
             placeholder="••••••••"
+            maxlength="15"
           />
 
         </div>
@@ -64,6 +66,7 @@
             v-model="form.password_confirmation"
             type="password"
             placeholder="••••••••"
+            maxlength="15"
           />
 
         </div>
