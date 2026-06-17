@@ -579,7 +579,7 @@ export default {
     },
 /////////////////////////////////////////////////////////////////////////////
       async loadUsers() {
-        await fetch(`${API_URL}/users`, {
+        const res = await fetch(`${API_URL}/users`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
