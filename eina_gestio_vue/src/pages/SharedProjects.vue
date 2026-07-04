@@ -1,7 +1,7 @@
 <template>
   <div class="Projects-content">
     
-    <div v-if="!selectedProject">
+    <div>
 
       <div class="projects-header">
 
@@ -21,7 +21,7 @@
             <h2 class="project-title">{{ p.name }}</h2>
 
             <div class="total-tareas">
-              {{ tasks[p.id_project]?.length || 0 }} tareas
+              {{ p.tasks_count }} tareas
             </div>
 
             <h3 class="project-users-title">Colaboradores</h3>
@@ -42,47 +42,7 @@
       </ul>
 
     </div>
-
-    <!-- VISTA PROYECTO -->
-    <div v-else>
-
-      <button @click="closeProject">⬅ Volver</button>
-
-      <h1>{{ selectedProject.name }}</h1>
-
-      <!-- CREAR TASK -->
-      <input 
-        v-model="newTask[selectedProject.id_project]" 
-        placeholder="Nueva tarea" 
-      />
-      <button @click="createTask(selectedProject.id_project)">+</button>
-
-      <!-- LISTA TASKS -->
-      <ul>
-        <li v-for="t in tasks[selectedProject.id_project]" :key="t.id_task">
-
-          <!-- NORMAL -->
-          <div v-if="editingTaskId !== t.id_task">
-            {{ t.name }}
-
-            <button @click="startEditTask(t)">✏️</button>
-            <button @click="deleteTask(t.id_task, selectedProject.id_project)">❌</button>
-          </div>
-
-          <!-- EDIT -->
-          <div v-else>
-            <input v-model="editTaskName" />
-
-            <button @click="updateTask(t.id_task, selectedProject.id_project)">
-              Guardar
-            </button>
-            <button @click="cancelEditTask">❌</button>
-          </div>
-
-        </li>
-      </ul>
-
-    </div>
+    
 
     <!-- SIDEBAR OVERLAY -->
       <div v-if="sidebarProject" class="sidebar-overlay" @click="closeSidebar">
@@ -256,14 +216,9 @@ export default {
     return {
       name: '',
       description: '',
-      projects: [], 
+      projects: [],       
 
-      tasks: {},
-      newTask: {},
-      editingTaskId: null,
-      editTaskName: '',
-
-      selectedProject: null,
+      
       sidebarProject: null,
       saveTimeout: null,
 
@@ -313,13 +268,7 @@ export default {
   
 
   methods: {
-    openProject(project) {
-      this.selectedProject = project
-      this.loadTasks(project.id_project)
-    },
-    closeProject() {
-      this.selectedProject = null
-    },
+    
 
     /////////////////////////////////////////////////////////////////////////////////////
     async loadProjects() {
@@ -339,10 +288,6 @@ export default {
       })
 
       this.projects = await res.json()
-      
-        this.projects.forEach(p => {
-          this.loadTasks(p.id_project)
-        })
     },
 ////////////////////////////////////////////////////////////////////////////////////////////
     async createProject() {
@@ -447,92 +392,7 @@ export default {
       }
     },
 
-    
 
-////////////////////////////////////////////////////////////////////////////////////////////  
-    async loadTasks(projectId) {
-
-      console.log('Cargando tareas...')
-        const res = await fetch(`${API_URL}/projects/${projectId}/tasks`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-        })
-
-      this.tasks[projectId] = await res.json()
-    },
-////////////////////////////////////////////////////////////////////////////////////////////
-    async createTask(projectId) {
-      console.log('VALOR TASK:', this.newTask[projectId])
-
-      await fetch(`${API_URL}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({
-          name: this.newTask[projectId],
-          project_task_id: projectId
-        }),
-      })
-
-      this.newTask[projectId] = ''
-      this.loadTasks(projectId)
-    },
-////////////////////////////////////////////////////////////////////////////////////////////    
-    async deleteTask(id, projectId) {
-      try {
-        const response = await fetch(`${API_URL}/tasks/${id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-            Accept: 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Error al eliminar la tarea');
-        }
-
-        console.log('Tarea eliminada correctamente');
-        this.loadTasks(projectId);
-
-      } catch (error) {
-        console.error('Error deleting task:', error.message);
-      }
-    },
-////////////////////////////////////////////////////////////////////////////////////////////  
-    startEditTask(task) {
-      this.editingTaskId = task.id_task
-      this.editTaskName = task.name
-    },
-    cancelEditTask() {
-      this.editingTaskId = null
-      this.editTaskName = ''
-    },
-////////////////////////////////////////////////////////////////////////////////////////////  
-    async updateTask(id, projectId) {      
-      try {
-        await fetch(`${API_URL}/tasks/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-          body: JSON.stringify({
-            name: this.editTaskName,
-          }),          
-        })       
-
-        this.editingTaskId = null
-        this.loadTasks(projectId)
-
-      } catch (error) {
-        console.error('Error actualizando tarea:', error)
-      }
-    },
 //////////////////////////////////////////////////////////////////////////////////////////// 
     openSidebar(project) {
       this.sidebarProject = project

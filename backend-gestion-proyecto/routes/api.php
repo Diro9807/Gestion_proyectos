@@ -46,3 +46,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [AuthController::class, 'updateProfile']);
 
 });
+
+Route::middleware(['auth:sanctum', 'admin'])->get('/admin-test', function () {
+
+    return response()->json([
+        'message' => 'Acceso permitido'
+    ]);
+
+});

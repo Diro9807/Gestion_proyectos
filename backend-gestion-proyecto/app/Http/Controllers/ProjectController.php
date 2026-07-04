@@ -225,7 +225,8 @@ class ProjectController extends Controller
 
         $projects = $user->projects()
             ->wherePivot('role', 'owner')
-            ->with(['users', 'tasks'])
+            ->with('users')
+            ->withCount('tasks')
             ->get();
 
         return response()->json($projects);
@@ -237,7 +238,8 @@ class ProjectController extends Controller
 
         $projects = $user->projects()
             ->wherePivotIn('role', ['admin', 'member'])
-            ->with(['users', 'tasks'])
+            ->with('users')
+            ->withCount('tasks')
             ->get();
 
         return response()->json($projects);
