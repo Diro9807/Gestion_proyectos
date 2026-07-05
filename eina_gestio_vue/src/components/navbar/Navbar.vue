@@ -62,6 +62,14 @@
       Compartidos
     </button>
 
+    <button
+      v-if="isAdmin"
+      class="links-btn"
+      @click="$router.push('/admin')"
+    >
+      Administración
+    </button>
+
     <!-- USER DESKTOP -->
     <div class="navbar-user desktop-user" @click="$router.push('/profile')">
 
@@ -124,6 +132,10 @@ export default {
 
     userInitial() {
       return this.userName.charAt(0).toUpperCase()
+    },
+
+    isAdmin() {
+      return this.user?.roles_id === 1
     }
   },
 

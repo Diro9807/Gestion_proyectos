@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\AdminController;
 
 
 // LOGIN / REGISTER
@@ -47,10 +48,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-Route::middleware(['auth:sanctum', 'admin'])->get('/admin-test', function () {
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
-    return response()->json([
-        'message' => 'Acceso permitido'
-    ]);
+    Route::get('/admin-test', function () {
+
+        return response()->json([
+            'message' => 'Acceso permitido'
+        ]);
+
+    });
+
+
+    Route::get('/admin/users', [AdminController::class, 'users']);
 
 });

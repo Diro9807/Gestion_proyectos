@@ -6,6 +6,7 @@ import Register from '../pages/Register.vue'
 import Dashboard from '../pages/Dashboard.vue'
 import Projects from '../pages/Projects.vue'
 import Profile from '../pages/Profile.vue'
+import AdminPanel from '../pages/AdminPanel.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -25,6 +26,11 @@ const routes = [
     path: '/shared-projects',
     name: 'SharedProjects',
     component: () => import('../pages/SharedProjects.vue')
+  },
+
+  {
+    path: '/admin',
+    component: AdminPanel
   }
 ]
 
