@@ -10,9 +10,7 @@
             /Administración
         </h1>
 
-        <button class="create-user-btn">
-            + Nuevo usuario
-        </button>
+        
 
     </div>
 
@@ -44,22 +42,30 @@
 
                     <td>
 
-                        <span
-                            class="role-badge"
-                            :class="user.role?.type_rol"
+                        <select
+                            class="role-select"
+                            :value="user.roles_id"
+                            @change="changeRole(user, $event)"
                         >
-                            {{ user.role?.type_rol }}
-                        </span>
+
+                            <option value="1">
+                                Administrador
+                            </option>
+
+                            <option value="2">
+                                Usuario
+                            </option>
+
+                        </select>
 
                     </td>
 
                     <td>
 
-                        <button class="edit-btn">
-                            ✏️
-                        </button>
-
-                        <button class="delete-btn">
+                        <button
+                            class="delete-btn"
+                            @click="deleteUser(user)"
+                        >
                             ❌
                         </button>
 
@@ -105,32 +111,45 @@ export default {
 
     async loadUsers() {
 
-      try {
+        try {
 
-        const response = await fetch(`${API_URL}/admin/users`, {
+            const response = await fetch(`${API_URL}/admin/users`, {
 
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-            Accept: 'application/json'
-          }
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+                Accept: 'application/json'
+            }
 
-        })
+            })
 
-        if (!response.ok) {
+            if (!response.ok) {
 
-          throw new Error('Error cargando usuarios')
+            throw new Error('Error cargando usuarios')
+
+            }
+
+            this.users = await response.json()
+
+        } catch (error) {
+
+            console.error(error)
 
         }
 
-        this.users = await response.json()
+    },
 
-      } catch (error) {
+    async changeRole(user, event) {
 
-        console.error(error)
+        const newRole = event.target.value
 
-      }
+        console.log(
+            user.name,
+            "=>",
+            newRole
+        )
 
-    }
+    },
+
 
   }
 
@@ -166,28 +185,7 @@ export default {
     margin:0;
 }
 
-.create-user-btn{
 
-    background:#FE9F5B;
-    color:white;
-
-    border:none;
-    border-radius:12px;
-
-    padding:14px 24px;
-
-    font-family:Poppins;
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:.2s;
-}
-
-.create-user-btn:hover{
-
-    background:#f1873c;
-}
 
 /* CONTENEDOR TABLA */
 
@@ -250,29 +248,35 @@ tbody tr:hover{
 
 /* ROLES */
 
-.role-badge{
+.role-select{
 
-    display:inline-block;
+    padding:8px 14px;
 
-    padding:6px 14px;
+    border-radius:10px;
 
-    border-radius:999px;
+    border:2px solid #d1d5db;
 
-    font-size:13px;
+    background:white;
+
+    font-family:Poppins;
 
     font-weight:600;
 
-    color:white;
+    cursor:pointer;
+
+    transition:.2s;
 }
 
-.role-badge.admin{
+.role-select:hover{
 
-    background:#ef4444;
+    border-color:#FE9F5B;
 }
 
-.role-badge.user{
+.role-select:focus{
 
-    background:#3b82f6;
+    outline:none;
+
+    border-color:#FE9F5B;
 }
 
 /* BOTONES */
@@ -320,10 +324,7 @@ tbody tr:hover{
     font-size:30px;
 }
 
-.create-user-btn{
 
-    width:100%;
-}
 
 table{
 
