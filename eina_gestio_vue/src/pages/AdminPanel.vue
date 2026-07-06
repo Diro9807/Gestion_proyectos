@@ -2,150 +2,164 @@
 
   
 
-  <div class="admin-panel">
+    <div class="admin-panel">
 
-    <div class="admin-header">
+        <div class="admin-header">
 
-        <h1 class="admin-title">
-            /Administración
-        </h1>
+            <h1 class="admin-title">
+                /Administración
+            </h1>
 
-        <div class="admin-tools">
+            <div class="admin-tools">
 
-            <input
-                v-model="search"
-                type="text"
-                placeholder="Buscar usuario..."
-                class="search-input"
-            >
+                <input
+                    v-model="search"
+                    type="text"
+                    placeholder="Buscar usuario..."
+                    class="search-input"
+                >
 
-            <select
-                v-model="roleFilter"
-                class="filter-select"
-            >
+                <select
+                    v-model="roleFilter"
+                    class="filter-select"
+                >
 
-                <option value="all">
-                    Todos
-                </option>
+                    <option value="all">
+                        Todos
+                    </option>
 
-                <option value="1">
-                    Administradores
-                </option>
+                    <option value="1">
+                        Administradores
+                    </option>
 
-                <option value="2">
-                    Usuarios
-                </option>
+                    <option value="2">
+                        Usuarios
+                    </option>
 
-            </select>
+                </select>
+
+            </div>
+
+            
 
         </div>
 
-        
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr
+                        v-for="user in paginatedUsers"
+                        :key="user.id_user"
+                    >
+
+                        <td>{{ user.name }}</td>
+
+                        <td>{{ user.email }}</td>
+
+                        <td>
+
+                            <select
+                                class="role-select"
+                                :class="user.roles_id == 1 ? 'admin-role' : 'user-role'"
+                                :value="user.roles_id"
+                                @change="changeRole(user, $event)"
+                            >
+                                <option value="1">
+                                    Administrador
+                                </option>
+
+                                <option value="2">
+                                    Usuario
+                                </option>
+                            </select>
+
+                        </td>
+
+                        <td>
+
+                            <button
+                                class="delete-btn"
+                                @click="openDeleteDialog(user)"
+                            >
+                                ❌
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div
+            v-if="totalPages > 1"
+            class="pagination"
+        >
+
+            <button
+                class="page-btn"
+                @click="currentPage--"
+                :disabled="currentPage === 1"
+            >
+                ←
+            </button>
+
+            <button
+                v-for="page in visiblePages"
+                :key="page"
+                class="page-number"
+                :class="{
+                    active: currentPage === page,
+                    dots: page === '...'
+                }"
+                @click="page !== '...' && (currentPage = page)"
+            >
+                {{ page }}
+            </button>
+
+            <button
+                class="page-btn"
+                @click="currentPage++"
+                :disabled="currentPage === totalPages"
+            >
+                →
+            </button>
+
+        </div>
 
     </div>
 
-    <div class="table-container">
+    <ConfirmationDialog
 
-        <table>
+        :show="showDeleteDialog"
+        title="Eliminar usuario"
+        :message="`¿Seguro que deseas eliminar a '${selectedUser?.name}'? Esta acción no se puede deshacer.`"
+        @cancel="showDeleteDialog = false;  selectedUser = null;"
+        @confirm="confirmDelete"
+    />
 
-            <thead>
+    <Popup
+        :show="showPopup"
+        :message="popupMessage"
+        :type="popupType"
+    />
 
-                <tr>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Rol</th>
-                    <th>Acciones</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                <tr
-                    v-for="user in paginatedUsers"
-                    :key="user.id_user"
-                >
-
-                    <td>{{ user.name }}</td>
-
-                    <td>{{ user.email }}</td>
-
-                    <td>
-
-                        <select
-                            class="role-select"
-                            :class="user.roles_id == 1 ? 'admin-role' : 'user-role'"
-                            :value="user.roles_id"
-                            @change="changeRole(user, $event)"
-                        >
-                            <option value="1">
-                                Administrador
-                            </option>
-
-                            <option value="2">
-                                Usuario
-                            </option>
-                        </select>
-
-                    </td>
-
-                    <td>
-
-                        <button
-                            class="delete-btn"
-                            @click="deleteUser(user)"
-                        >
-                            ❌
-                        </button>
-
-                    </td>
-
-                </tr>
-
-            </tbody>
-        </table>
-    </div>
-
-    <div
-    v-if="totalPages > 1"
-    class="pagination"
->
-
-    <button
-        class="page-btn"
-        @click="currentPage--"
-        :disabled="currentPage === 1"
-    >
-        ←
-    </button>
-
-    <button
-        v-for="page in visiblePages"
-        :key="page"
-        class="page-number"
-        :class="{
-            active: currentPage === page,
-            dots: page === '...'
-        }"
-        @click="page !== '...' && (currentPage = page)"
-    >
-        {{ page }}
-    </button>
-
-    <button
-        class="page-btn"
-        @click="currentPage++"
-        :disabled="currentPage === totalPages"
-    >
-        →
-    </button>
-
-</div>
-
-
-
-
-</div>
+    
 
 </template>
 
@@ -153,19 +167,33 @@
 
 
 import { API_URL } from '@/config'
+import ConfirmationDialog from '@/dialogs/ConfirmationDialog.vue'
+import Popup from '@/components/ui/Popup.vue'
 
 export default {
+
+    components: {
+        ConfirmationDialog,
+        Popup
+    },
 
  
   data() {
 
     return {
 
-      users: [],
-      search: '',
-      roleFilter: 'all',
-      currentPage: 1,
-      usersPerPage: 8
+        users: [],
+        search: '',
+        roleFilter: 'all',
+        currentPage: 1,
+        usersPerPage: 8,
+        showDeleteDialog: false,
+        selectedUser: null,
+
+        popupMessage:'',
+        popupType:'success',
+        showPopup:false,
+        
 
     }
 
@@ -347,7 +375,10 @@ export default {
 
             if (!response.ok) {
 
-                alert(data.message)
+                this.showPopupMessage(
+                    data.message,
+                    'error'
+                )
 
                 event.target.value = user.roles_id
 
@@ -371,62 +402,113 @@ export default {
 
     },
 
-    async deleteUser(user) {
-
-        const confirmDelete = confirm(
-            `Vas a eliminar definitivamente al usuario "${user.name}". Esta acción no se puede deshacer.
-            ¿Continuar?`
-        )
-
-        if (!confirmDelete) {
-
-            return
-
-        }
+    async confirmDelete() {
 
         try {
 
             const response = await fetch(
-                `${API_URL}/admin/users/${user.id_user}`,
+                `${API_URL}/admin/users/${this.selectedUser.id_user}`,
                 {
-
                     method: 'DELETE',
 
-                    headers:{
-
+                    headers: {
                         Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
                         Accept: 'application/json'
-
                     }
 
                 }
             )
 
-           const data = await response.json()
+            const data = await response.json()
 
             if (!response.ok) {
-                alert(data.message)
+
+                this.showDeleteDialog = false
+
+                
+
                 return
+
             }
 
+            const deletedName = this.selectedUser.name
+
             this.users = this.users.filter(
-                u => u.id_user !== user.id_user
+                u => u.id_user !== this.selectedUser.id_user
             )
 
-            alert(data.message)
+            if (this.currentPage > this.totalPages) {
 
+                this.currentPage = this.totalPages || 1
+
+            }
+
+            this.showDeleteDialog = false
+            this.selectedUser = null
+
+            this.showPopupMessage(
+                `Usuario "${deletedName}" eliminado correctamente.`,
+                'success'
+            )
+
+            
         }
-
         catch(error){
 
             console.error(error)
 
-            alert("Error eliminando usuario.")
+            this.showDeleteDialog = false
+
+            this.showPopupMessage(
+                "Error eliminando usuario.",
+                "error"
+            )
 
         }
 
-    }
+    },
 
+    fixCurrentPage() {
+
+        if (this.currentPage > this.totalPages) {
+
+            this.currentPage = this.totalPages || 1
+
+        }
+
+        if (this.currentPage < 1) {
+
+            this.currentPage = 1
+
+        }
+
+    },
+
+    openDeleteDialog(user){
+
+        this.selectedUser = user
+
+        this.showDeleteDialog = true
+
+    },
+
+    showPopupMessage(message, type = 'success') {
+
+        this.popupMessage = message
+
+        this.popupType = type
+
+        this.showPopup = true
+
+        setTimeout(() => {
+
+            this.showPopup = false
+
+        }, 3000)
+
+    },
+
+    
 
   }
 }
@@ -768,6 +850,8 @@ tbody tr:hover{
     border:none;
 
 }
+
+
 
 @media(max-width:768px){
 
