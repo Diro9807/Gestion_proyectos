@@ -71,21 +71,7 @@
 
         </div>
 
-        <!-- ERROR -->
-        <p
-          v-if="error"
-          class="error"
-        >
-          {{ error }}
-        </p>
-
-        <!-- SUCCESS -->
-        <p
-          v-if="success"
-          class="success"
-        >
-          {{ success }}
-        </p>
+        
 
         <!-- SAVE -->
         <button
@@ -99,12 +85,11 @@
 
     </div>
 
-    <div
-    v-if="showError"
-    class="error-popup"
-    >
-    {{ errorMessage }}
-    </div>
+    <Popup
+      :show="showPopup"
+      :message="popupMessage"
+      :type="popupType"
+    />
 
   </div>
 
@@ -113,10 +98,15 @@
 <script>
 
 import { API_URL } from '@/config'
+import Popup from '@/components/ui/Popup.vue'
 
 export default {
 
   name: 'ProfilePage',
+
+  components: {
+    Popup
+  },
 
   data() {
 
@@ -132,10 +122,13 @@ export default {
         password_confirmation: '',
       },
 
-      error: '',
-      success: '',
-      errorMessage: '',
-      showError: false,
+      
+
+      // POPUP
+      showPopup: false,
+      popupMessage: '',
+      popupType: 'success',
+      
     }
   },
 
@@ -147,9 +140,6 @@ export default {
   methods: {
 
     async updateProfile() {
-
-      this.error = ''
-      this.success = ''
 
       try {
 
@@ -190,42 +180,50 @@ export default {
           new Event('auth-changed')
         )
 
-        this.success =
-          'Perfil actualizado correctamente'
+        this.showPopupMessage(
+          'Perfil actualizado correctamente',
+          'success'
+        )
 
         this.form.password = ''
         this.form.password_confirmation = ''
 
       } catch (error) {
 
-            const errorData =
-                error.response?.data
+        const errorData =
+          error.response?.data
 
-            if (errorData?.errors?.name) {
+        if (errorData?.errors?.name) {
 
-                this.showErrorPopup(
-                'Nombre de usuario en uso'
-                )
+          this.showPopupMessage(
+            'Nombre de usuario en uso',
+            'error'
+          )
 
-            } else {
+        } else {
 
-                this.showErrorPopup(
-                error.message || 'Error'
-                )
-            }
+          this.showPopupMessage(
+            error.message || 'Error',
+            'error'
+          )
+
         }
+
+      }
     },
 
-    showErrorPopup(message) {
+    showPopupMessage(message, type = 'success') {
 
-        this.errorMessage = message
-        this.showError = true
+      this.popupMessage = message
+      this.popupType = type
+      this.showPopup = true
 
-        setTimeout(() => {
+      setTimeout(() => {
 
-            this.showError = false
+        this.showPopup = false
 
-        }, 3000)
+      }, 3000)
+
     }
 
   }
@@ -344,64 +342,9 @@ export default {
   background: #0f5cd1;
 }
 
-.error {
 
-  color: red;
 
-  font-weight: 600;
-}
 
-.success {
-
-  color: green;
-
-  font-weight: 600;
-}
-
-.error-popup {
-
-  position: fixed;
-
-  bottom: 30px;
-  right: 30px;
-
-  background: #ef4444;
-
-  color: white;
-
-  padding: 14px 20px;
-
-  border-radius: 12px;
-
-  font-family: Poppins;
-
-  font-weight: 600;
-
-  box-shadow:
-    0 8px 25px rgba(0,0,0,0.25);
-
-  z-index: 999999;
-
-  animation:
-    popupFade 0.3s ease;
-}
-
-@keyframes popupFade {
-
-  from {
-
-    opacity: 0;
-
-    transform: translateY(15px);
-  }
-
-  to {
-
-    opacity: 1;
-
-    transform: translateY(0);
-  }
-}
 
 /* MOBILE */
 

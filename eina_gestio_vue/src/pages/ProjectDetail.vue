@@ -173,7 +173,7 @@
                       <span class="drag-handle">
                         ☰
                       </span>
-                      <button @click="deleteTask(t.id_task)">
+                      <button @click="openDeleteDialog(t.id_task)">
                         ❌
                       </button>
                     </div>
@@ -289,16 +289,37 @@
 
     </div>
   </div>
+  <!-- DIALOGO CONFIRMAR ELIMINACIÓN -->
+
+  <ConfirmationDialog
+    :show="showDeleteDialog"
+    title="Eliminar tarea"
+    message="¿Seguro que quieres eliminar esta tarea?"
+    @confirm="confirmDeleteTask"
+    @cancel="cancelDeleteTask"
+  />
+
+  <!-- POPUP -->
+
+  <Popup
+    :show="showPopup"
+    :message="popupMessage"
+    :type="popupType"
+  />
 </template>
 
 <script>
 import draggable from 'vuedraggable'
 import { API_URL } from '@/config'
+import Popup from '@/components/ui/Popup.vue'
+import ConfirmationDialog from '@/components/ui/ConfirmationDialog.vue'
 
 export default {
   
   components: {
-    draggable
+    draggable,
+    Popup,
+    ConfirmationDialog
   },
 
   props: ['id'],
@@ -323,6 +344,15 @@ export default {
       newUserId: null,
 
       minDate: new Date().toISOString().split('T')[0],
+
+      // POPUP
+      showPopup: false,
+      popupMessage: '',
+      popupType: 'success',
+
+      // CONFIRMATION DIALOG
+      showDeleteDialog: false,
+      taskToDelete: null
 
     }
   },
@@ -374,91 +404,206 @@ export default {
 
       console.log('Nueva task:', this.newTask)
 
-      await fetch(`${API_URL}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-
-        body: JSON.stringify({
-          name: this.newTask,
-          description: this.newDescription,
-          start_date: this.newStartDate,
-          end_date: this.newEndDate,
-          due_date: this.newDueDate,
-          status: this.newStatus,
-          project_task_id: this.projectId,
-          user_id: this.newUserId
-        }),
-      })
-
-      this.closeTaskModal()
-
-      this.loadTasks()
-    },
-
-    //////////////////////////////////////////////////////////////////////
-    async deleteTask(id) {
-      const confirmed = confirm(
-          '¿Seguro que quieres eliminar esta tarea?'
-        )
-
-        if (!confirmed) return
       try {
 
-        await fetch(`${API_URL}/tasks/${id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-        })
+        const response = await fetch(`${API_URL}/tasks`, {
 
-        this.loadTasks()
+          method: 'POST',
 
-      } catch (error) {
-        console.error('Error eliminando tarea:', error)
-      }
-    },
-
-    ///////////////////////
-    // startEditTask(task) {
-    //   this.editingTaskId = task.id_task
-    //   this.editTaskName = task.name
-    // },
-
-    // cancelEditTask() {
-    //   this.editingTaskId = null
-    //   this.editTaskName = ''
-    // },
-
-    /////////////////////////////////////////////////////////////////////////
-    async updateTask(task) {
-      try {
-
-        await fetch(`${API_URL}/tasks/${task.id_task}`, {
-          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+            Authorization:
+              `Bearer ${localStorage.getItem('auth_token')}`,
           },
 
           body: JSON.stringify({
-            name: task.name,
-            description: task.description,
-            start_date: task.start_date,
-            end_date: task.end_date,
-            due_date: task.due_date,
-            status: task.status,
-            user_id: task.user_id
+
+            name: this.newTask,
+            description: this.newDescription,
+            start_date: this.newStartDate,
+            end_date: this.newEndDate,
+            due_date: this.newDueDate,
+            status: this.newStatus,
+            project_task_id: this.projectId,
+            user_id: this.newUserId
+
           }),
+
         })
 
-        this.loadTasks()
+
+        if (!response.ok) {
+
+          throw new Error(
+            'No se ha podido crear la tarea'
+          )
+
+        }
+
+
+        this.closeTaskModal()
+
+        await this.loadTasks()
+
+
+        this.showPopupMessage(
+          'Tarea creada correctamente',
+          'success'
+        )
+
 
       } catch (error) {
-        console.error('Error actualizando tarea:', error)
+
+        console.error(
+          'Error creando tarea:',
+          error
+        )
+
+
+        this.showPopupMessage(
+          'Error al crear la tarea',
+          'error'
+        )
+
       }
+
+    },
+
+    //////////////////////////////////////////////////////////////////////
+    openDeleteDialog(id) {
+
+      this.taskToDelete = id
+      this.showDeleteDialog = true
+
+    },
+
+    cancelDeleteTask() {
+
+      this.showDeleteDialog = false
+      this.taskToDelete = null
+
+    },
+
+    async confirmDeleteTask() {
+      if (!this.taskToDelete) {
+        return
+      }
+
+      const id = this.taskToDelete
+      this.showDeleteDialog = false
+
+      try {
+        const response = await fetch(
+          `${API_URL}/tasks/${id}`,
+          {
+            method: 'DELETE',
+
+            headers: {
+              Authorization:
+                `Bearer ${localStorage.getItem('auth_token')}`
+            }
+
+          }
+        )
+        if (!response.ok) {
+
+          throw new Error(
+            'No se ha podido eliminar la tarea'
+          )
+        }
+
+        await this.loadTasks()
+
+        this.showPopupMessage(
+          'Tarea eliminada correctamente',
+          'success'
+        )
+
+      } catch (error) {
+
+        console.error(
+          'Error eliminando tarea:',
+          error
+        )
+
+        this.showPopupMessage(
+          'Error al eliminar la tarea',
+          'error'
+        )
+
+      } finally {
+
+        this.taskToDelete = null
+
+      }
+
+    },
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    async updateTask(task) {
+
+      try {
+
+        const response = await fetch(
+          `${API_URL}/tasks/${task.id_task}`,
+          {
+            method: 'PUT',
+
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization:
+                `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+
+            body: JSON.stringify({
+
+              name: task.name,
+              description: task.description,
+              start_date: task.start_date,
+              end_date: task.end_date,
+              due_date: task.due_date,
+              status: task.status,
+              user_id: task.user_id
+
+            }),
+
+          }
+        )
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            'No se ha podido actualizar la tarea'
+          )
+
+        }
+
+
+        await this.loadTasks()
+
+
+        this.showPopupMessage(
+          'Tarea actualizada correctamente',
+          'success'
+        )
+
+
+      } catch (error) {
+
+        console.error(
+          'Error actualizando tarea:',
+          error
+        )
+
+
+        this.showPopupMessage(
+          'Error al actualizar la tarea',
+          'error'
+        )
+
+      }
+
     },
 /////////////////////////////////////////////////////////
     async loadProjectUsers() {
@@ -503,7 +648,7 @@ export default {
     },
 
 /////////////////////////////////////////////////////////////////////////
-    async saveTaskOrder() {
+   async saveTaskOrder() {
 
       try {
 
@@ -512,27 +657,70 @@ export default {
           position: index
         }))
 
-        await fetch(`${API_URL}/tasks/reorder`,
+
+        const response = await fetch(
+          `${API_URL}/tasks/reorder`,
           {
             method: 'POST',
 
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+              Authorization:
+                `Bearer ${localStorage.getItem('auth_token')}`,
             },
 
             body: JSON.stringify({
               tasks: orderedTasks
             }),
+
           }
         )
 
+
+        if (!response.ok) {
+
+          throw new Error(
+            'No se ha podido guardar el orden de las tareas'
+          )
+
+        }
+
+
+        this.showPopupMessage(
+          'Orden de tareas actualizado correctamente',
+          'success'
+        )
+
+
       } catch (error) {
 
-        console.error('Error guardando orden:', error)
+        console.error(
+          'Error guardando orden:',
+          error
+        )
+
+
+        this.showPopupMessage(
+          'Error al guardar el orden de las tareas',
+          'error'
+        )
 
       }
-    }
+
+    },
+
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    showPopupMessage(message, type = 'success') {
+
+      this.popupMessage = message
+      this.popupType = type
+      this.showPopup = true
+
+      setTimeout(() => {
+        this.showPopup = false
+      }, 3000)
+    },
 
   }
 }
