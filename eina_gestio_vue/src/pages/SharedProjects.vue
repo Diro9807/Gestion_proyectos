@@ -202,15 +202,31 @@
 
         </div>
       </div>
-      <!-- ERROR POPUP -->
-    <div v-if="showError" class="error-popup">
-      {{ errorMessage }}
-    </div>
+      
   </div>  
+  <Popup
+    :show="showPopup"
+    :message="popupMessage"
+    :type="popupType"
+  />
+
+  <ConfirmationDialog
+    :show="showDeleteDialog"
+    title="Eliminar proyecto"
+    message="¿Seguro que deseas eliminar este proyecto? Esta acción no se puede deshacer."
+    @confirm="confirmDelete"
+    @cancel="cancelDelete"
+  />
+  
 </template>
 
 <script>
 import { API_URL } from '@/config'
+import Popup from '@/components/ui/Popup.vue'
+import ConfirmationDialog from '@/components/ui/ConfirmationDialog.vue'
+
+
+
 export default {
   data() {    
     return {
@@ -228,13 +244,22 @@ export default {
       showCreateModal: false,
       newProjectUsers: [],
 
-      errorMessage: '',
-      showError: false,
+      popupMessage: '',
+      popupType: 'success',
+      showPopup: false,
+
+      showDeleteDialog: false,
+      projectToDelete: null,
 
       mouseX: '50%',
       mouseY: '50%',
 
     }    
+  },
+
+  components:{
+    Popup,
+    ConfirmationDialog
   },
 
   computed: {
@@ -268,8 +293,6 @@ export default {
   
 
   methods: {
-    
-
     /////////////////////////////////////////////////////////////////////////////////////
     async loadProjects() {
 
@@ -360,38 +383,81 @@ export default {
     },
 ////////////////////////////////////////////////////////////////////////////////////////////
     async deleteProject(id) {
-      const confirmed = confirm(
-          '¿Seguro que quieres eliminar este proyecto?'
-        )
+      this.projectToDelete = id
+      this.showDeleteDialog = true
 
-        if (!confirmed) return
-
-      try {
-        const response = await fetch(`${API_URL}/projects/${id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-            Accept: 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'No autorizado');
-        }
-
-          // opcional: actualizar UI
-        console.log('Proyecto eliminado correctamente');
-        this.loadProjects();
-
-      } catch (error) {
-        console.error('Error deleting project:', error.message);
-
-        this.showErrorPopup(error.message)
-
-      }
     },
 
+
+    confirmDelete() {
+      this.showDeleteDialog = false
+      this.deleteProjectConfirmed()
+
+    },
+
+    cancelDelete() {
+      this.showDeleteDialog = false
+      this.projectToDelete = null
+
+    },
+
+///////////////////////////////////////////////////////////////////////////////////////////
+    async deleteProjectConfirmed() {
+
+      try {
+
+          const response = await fetch(
+
+              `${API_URL}/projects/${this.projectToDelete}`,
+
+              {
+
+                  method: 'DELETE',
+
+                  headers: {
+
+                      Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+                      Accept: 'application/json'
+
+                  }
+
+              }
+
+          )
+
+          if (!response.ok) {
+
+              const error = await response.json()
+
+              throw new Error(
+                  error.message || 'No autorizado'
+              )
+
+          }
+
+          await this.loadProjects()
+
+          this.sidebarProject = null
+
+          this.showPopupMessage(
+              'Proyecto eliminado correctamente',
+              'success'
+          )
+
+      } catch (error) {
+
+          console.error(error)
+
+          this.showPopupMessage(
+              error.message,
+              'error'
+          )
+
+      }
+
+      this.projectToDelete = null
+
+    },
 
 //////////////////////////////////////////////////////////////////////////////////////////// 
     openSidebar(project) {
@@ -508,7 +574,7 @@ export default {
 
             const error = await response.json()
 
-            this.showErrorPopup(error.message)
+            this.showPopupMessage(error.message, "error")
 
             return
           }
@@ -525,7 +591,10 @@ export default {
 
           console.error(error)
 
-          this.showErrorPopup('Error inesperado')
+          this.showPopupMessage(
+            "Error inesperado",
+            "error"
+          )
         }
       }, 
 ///////////////////////////////////////////////////////////////
@@ -545,7 +614,10 @@ export default {
 
           const error = await response.json()
 
-          this.showErrorPopup(error.message)
+          this.showPopupMessage(
+            error.message,
+            "error"
+          )
 
           return
         }
@@ -559,7 +631,10 @@ export default {
 
         console.error(error)
 
-        this.showErrorPopup('Error inesperado')
+        this.showPopupMessage(
+          "Error inesperado",
+          "error"
+        )
       }
     },
 /////////////////////////////////////////////////////////////////////////////
@@ -591,22 +666,25 @@ export default {
         year: 'numeric',
       })
     },
-////////////////////////////////////////////////////////////////////////////////////
-    showErrorPopup(message) {
-
-      this.errorMessage = message
-      this.showError = true
-
-      setTimeout(() => {
-        this.showError = false
-      }, 3000)
-    },
-
+///////////////////////////////////////////////////////////////////////////////////
     handleMouseMove(e) {
 
       this.mouseX = `${(e.clientX / window.innerWidth) * 100}%`
       this.mouseY = `${(e.clientY / window.innerHeight) * 100}%`
     },
+
+    showPopupMessage(message, type = "error") {
+
+      this.popupMessage = message
+      this.popupType = type
+      this.showPopup = true
+
+      setTimeout(() => {
+
+          this.showPopup = false
+
+      },3000)
+    }
 
 
   },
@@ -1314,34 +1392,8 @@ li button:first-child:hover {
   background: #15803d;
 }
 
-.error-popup {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  background: #ef4444;
-  color: white;
-  padding: 14px 20px;
-  border-radius: 12px;
-  font-family: Poppins;
-  font-weight: 600;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-  z-index: 999999;
-  animation: popupFade 0.3s ease;
-  pointer-events: none;
-}
 
-@keyframes popupFade {
 
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* ================================= */
 /* RESPONSIVE MOVIL */

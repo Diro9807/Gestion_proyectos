@@ -217,17 +217,31 @@
           </button>
 
         </div>
-      </div>
-    <!-- ERROR POPUP -->
-    <div v-if="showError" class="error-popup">
-      {{ errorMessage }}
     </div>
-  </div>
+      <Popup
+        :show="showPopup"
+        :message="popupMessage"
+        :type="popupType"
+      />
+
+      <ConfirmationDialog
+        :show="showDeleteDialog"
+        title="Eliminar proyecto"
+        message="¿Seguro que deseas eliminar este proyecto? Esta acción no se puede deshacer."
+        @confirm="confirmDelete"
+        @cancel="cancelDelete"
+      />
+
+
+</div>
   
 </template>
 
 <script>
 import { API_URL } from '@/config'
+import Popup from '@/components/ui/Popup.vue'
+import ConfirmationDialog from '@/components/ui/ConfirmationDialog.vue'
+
 export default {
   data() {    
     return {
@@ -246,12 +260,21 @@ export default {
       showCreateModal: false,
       newProjectUsers: [],
 
-      errorMessage: '',
-      showError: false,
+      popupMessage: '',
+      popupType: 'success',
+      showPopup: false,
+
+      showDeleteDialog: false,
+      projectToDelete: null,
 
       mouseX: '50%',
       mouseY: '50%',
     }    
+  },
+
+  components: {
+    Popup,
+    ConfirmationDialog
   },
 
   computed: {
@@ -314,23 +337,31 @@ export default {
     //////////////////////////////////////////////////////////////////
     async loadProjects() {
 
-      console.log('Cargando proyectos...')
-      const token = localStorage.getItem('auth_token')
-      if (!token) {
-        console.log("No hay auth token")
-        console.error('No auth token found')
-        this.$router.push('/login')
-        return
-      }
-      const res = await fetch(`${API_URL}/owned-projects`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-      })
+      try{
+        console.log('Cargando proyectos...')
+        const token = localStorage.getItem('auth_token')
+          if (!token) {
+
+            console.log("No hay auth token")
+            console.error('No auth token found')
+            this.$router.push('/login')
+
+            return
+          }
+
+          const res = await fetch(`${API_URL}/owned-projects`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+          })
 
       this.projects = await res.json()
-      
-        
+      } catch(error){
+        this.showPopupMessage(
+            "No se pudieron cargar los proyectos",
+            "error"
+        )
+      }
     },
 ////////////////////////////////////////////////////////////////////////////////////////////
     async createProject() {
@@ -393,41 +424,88 @@ export default {
         }
 
         this.closeCreateModal()
-        this.loadProjects()
 
-      } catch (error) {
+        this.showPopupMessage(
+          "Proyecto creado correctamente",
+          "success"
+        )
+        
+        await this.loadProjects()
+
+      } catch (error) {       
         console.error(error)
+
+        this.showPopupMessage(
+          error.message || "Error creando proyecto",
+          "error"
+        )
       }
     },
 ////////////////////////////////////////////////////////////////////////////////////////////
     async deleteProject(id) {
-      const confirmed = confirm(
-          '¿Seguro que quieres eliminar este proyecto?'
-        )
+      
+      this.projectToDelete = id
+      this.showDeleteDialog = true
 
-        if (!confirmed) return
+    },
+
+    async confirmDelete() {
+
+      this.showDeleteDialog = false
+      await this.deleteProjectConfirmed()
+
+    },
+
+    cancelDelete() {
+
+      this.showDeleteDialog = false
+      this.projectToDelete = null
+
+    },
+
+    async deleteProjectConfirmed() {
 
       try {
-        const response = await fetch(`${API_URL}/projects/${id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-            Accept: 'application/json',
-          },
-        });
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Error al eliminar el proyecto');
-        }
+        const response = await fetch(
+          `${API_URL}/projects/${this.projectToDelete}`,{
+              method: "DELETE",
 
-          // opcional: actualizar UI
-        console.log('Proyecto eliminado correctamente');
-        this.loadProjects();
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                Accept: "application/json",
+              },
+            }
+          )
+
+          if (!response.ok) {
+            const error = await response.json()
+
+            throw new Error(
+              error.message || "Error al eliminar el proyecto"
+            )
+
+          }
+
+          this.showPopupMessage(
+            "Proyecto eliminado correctamente",
+            "success"
+          )
+
+          await this.loadProjects()
+          this.sidebarProject = null
+          this.projectToDelete = null
+
       } catch (error) {
-        console.error('Error deleting project:', error.message);
+
+          this.showPopupMessage(
+              error.message || "Error al eliminar el proyecto",
+              "error"
+          )
+
       }
-    },
+
+  },
 
     
 
@@ -444,7 +522,7 @@ export default {
     this.saveTimeout = setTimeout(() => {
       this.autoSaveProject()
     }, 700)
-},
+  },
 ///////////////////////////////////////////////////////////////////////
     async autoSaveProject() {
       try {
@@ -472,18 +550,30 @@ export default {
         }
 
       } catch (error) {
-        console.error('Error autoguardando proyecto:', error)
+        console.error('Error autoguardando proyecto:', error)        
       }
     },
 /////////////////////////////////////////////////////////////////////////////
-      async loadUsers() {
-        const res = await fetch(`${API_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+    async loadUsers() {
+      try {
 
-      })
-      this.users = await res.json()
+        const res = await fetch(`${API_URL}/users`, {
+          headers: {
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+
+        })
+
+        this.users = await res.json()
+
+        } catch (error) {
+          this.showPopupMessage(
+            "No se pudieron cargar los usuarios",
+            "error"
+          )
+        }
+         
+        
     },
 /////////////////////////////////////////////////////////////////////////////
       closeCreateModal() {
@@ -505,7 +595,10 @@ export default {
 
         // SI NO EXISTE EL USER
         if (!user) {
-          console.error('Usuario no encontrado')
+          this.showPopupMessage(
+            "Usuario no encontrado",
+            "error"
+          )
           return
         }
 
@@ -560,7 +653,10 @@ export default {
           console.log(data)
 
           if (!response.ok) {
-            this.showErrorPopup(data.message)
+            this.showPopupMessage(
+              data.message,
+              "error"
+            )
             return
           }
 
@@ -583,7 +679,7 @@ export default {
 
           console.error(error)
 
-          this.showErrorPopup('Error inesperado')
+          this.showPopupMessage('Error inesperado')
         }
       },
 ///////////////////////////////////////////////////////////////
@@ -604,7 +700,7 @@ export default {
 
           const error = await response.json()
 
-          this.showErrorPopup(error.message)
+          this.showPopupMessage(error.message)
 
           return
         }
@@ -614,9 +710,14 @@ export default {
             u => u.id_user !== userId
           )
 
+        this.showPopupMessage(
+          "Usuario eliminado del proyecto",
+          "success"
+        )
+
       } catch (error) {
 
-        this.showErrorPopup('Error inesperado')
+        this.showPopupMessage('Error inesperado')
       }
     },  
 /////////////////////////////////////////////////////////////////////////////
@@ -649,13 +750,16 @@ export default {
       })
     },
 ////////////////////////////////////////////////////////////////////////////////////
-    showErrorPopup(message) {
+    showPopupMessage(message, type = "error") {
 
-      this.errorMessage = message
-      this.showError = true
+      this.popupMessage = message
+      this.popupType = type
+      this.showPopup = true
 
       setTimeout(() => {
-        this.showError = false
+
+        this.showPopup = false
+
       }, 3000)
     },
 
@@ -666,8 +770,10 @@ export default {
     },
 
 
-  },
+  }
+
 }
+
 </script>
 
 <style scoped>
@@ -1378,41 +1484,6 @@ li button:first-child:hover {
   background: #15803d;
 }
 
-.error-popup {
-  position: fixed;
-
-  bottom: 30px;
-  right: 30px;
-
-  background: #ef4444;
-  color: white;
-
-  padding: 14px 20px;
-
-  border-radius: 12px;
-
-  font-family: Poppins;
-  font-weight: 600;
-
-  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-
-  z-index: 999999;
-
-  animation: popupFade 0.3s ease;
-}
-
-@keyframes popupFade {
-
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 .owner-badge {
   background: #facc15;

@@ -167,7 +167,7 @@
 
 
 import { API_URL } from '@/config'
-import ConfirmationDialog from '@/dialogs/ConfirmationDialog.vue'
+import ConfirmationDialog from '@/components/ui/ConfirmationDialog.vue'
 import Popup from '@/components/ui/Popup.vue'
 
 export default {

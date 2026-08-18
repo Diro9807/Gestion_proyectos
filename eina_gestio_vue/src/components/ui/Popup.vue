@@ -3,11 +3,8 @@
 <div
     v-if="show"
     class="popup"
-    :class="type"
->
-
+    :class="type">
     {{ message }}
-
 </div>
 
 </template>
