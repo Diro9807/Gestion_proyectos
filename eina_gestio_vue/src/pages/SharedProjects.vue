@@ -34,7 +34,7 @@
             </div>
 
             <p class="project-description">{{ formatDate(p.created_at) }}</p>
-            <button @click.stop="deleteProject(p.id_project)">❌</button>
+            
 
           </div>
           
@@ -54,14 +54,14 @@
           <input
             v-model="sidebarProject.name" disabled
             class="sidebar-title-input"
-            @input="debouncedSaveProject"
+            
           />
 
           <textarea
             v-model="sidebarProject.description" disabled
             class="sidebar-description-input"
             placeholder="Añadir descripción..."
-            @input="debouncedSaveProject"
+            
           ></textarea>
 
           <div class="sidebar-info">
@@ -73,63 +73,33 @@
           </div>
           <div class="sidebar-users">
             <h3>Usuarios</h3>
-            <div class="add-user-section">
-            <select v-model="selectedUserId">
 
-              <option disabled value="">
-                Seleccionar usuario
-              </option>
-
-              <option
-                v-for="u in users"
-                :key="u.id_user"
-                :value="u.id_user"
-              >
-                {{ u.name }}
-              </option>
-
-            </select>
-
-            <button @click="addUserToProject">
-              Añadir
-            </button>
-          </div>
             <div v-if="sidebarProject.users?.length" class="users-list">
-              <div v-for="u in sidebarProject.users" :key="u.id_user" class="user-card">
-                <div class="user-avatar">
-                  {{ u.name.charAt(0).toUpperCase() }}
+                <div
+                    v-for="u in sidebarProject.users"
+                    :key="u.id_user"
+                    class="user-card"
+                >
+                    <div class="user-avatar">
+                        {{ u.name.charAt(0).toUpperCase() }}
+                    </div>
+
+                    <div class="user-data">
+                        <p class="user-name">
+                            {{ u.name }}
+                        </p>
+
+                        <div class="user-role-badge" :class="u.pivot?.role">
+                            {{ u.pivot?.role }}
+                        </div>
+                    </div>
                 </div>
-
-                <div class="user-data">
-
-                  <p class="user-name">
-                    {{ u.name }}
-                  </p>
-
-                  <div class="user-role-badge" :class="u.pivot?.role">
-                    {{ u.pivot?.role }}
-                  </div>
-
-                  
-
-                  <div class="remove-user">
-                    <button
-                      class="remove-user-btn"
-                      @click.stop="removeUserFromProject(u.id_user)"
-                    >
-                      ❌
-                    </button>
-                  </div>
-
-                </div>
-                
-
-              </div>
             </div>
+
             <p v-else>
-              Sin usuarios asignados
+                Sin usuarios asignados
             </p>
-          </div>
+        </div>
 
           <button
             class="open-project-btn"
@@ -141,67 +111,7 @@
         </div>
 
       </div>
-      <!-- CREATE PROJECT MODAL -->
-      <div
-        v-if="showCreateModal"
-        class="modal-overlay"
-        @click="closeCreateModal"
-      >
-        <div class="create-modal" @click.stop>
-
-          <button class="close-modal-btn" @click="closeCreateModal">❌</button>
-
-          <h2>Creando Proyecto...</h2>
-
-          <input v-model="name"placeholder="Nombre del proyecto"/>
-
-          <textarea v-model="description" placeholder="Descripción del proyecto" class="create-description"></textarea>
-
-          <div class="create-users-section">
-
-            <h3>Usuarios del proyecto</h3>
-
-            <select v-model="selectedUserId">
-              <option disabled value="">
-                Seleccionar usuario
-              </option>
-
-              <option
-                v-for="u in users"
-                :key="u.id_user"
-                :value="u.id_user"
-              >
-                {{ u.name }}
-              </option>            
-
-            </select>
-            
-
-            <button @click="addUserToNewProject">
-              Añadir
-            </button>
-
-          </div>
-
-          <div class="selected-users">
-            <span
-              v-for="u in newProjectUsers"
-              :key="u.id_user"
-              class="selected-user">
-              {{ u.name }}
-
-              <button @click="removeUserFromNewProject(u.id_user)">
-                ❌
-              </button>
-            </span>
-          </div>
-
-          <button class="confirm-create-btn" @click="createProject">
-            Crear Proyecto
-          </button>
-
-        </div>
-      </div>
+      
       
   </div>  
   <Popup
@@ -210,46 +120,27 @@
     :type="popupType"
   />
 
-  <ConfirmationDialog
-    :show="showDeleteDialog"
-    title="Eliminar proyecto"
-    message="¿Seguro que deseas eliminar este proyecto? Esta acción no se puede deshacer."
-    @confirm="confirmDelete"
-    @cancel="cancelDelete"
-  />
+  
   
 </template>
 
 <script>
 import { API_URL } from '@/config'
 import Popup from '@/components/ui/Popup.vue'
-import ConfirmationDialog from '@/components/ui/ConfirmationDialog.vue'
+
 
 
 
 export default {
   data() {    
-    return {
-      name: '',
-      description: '',
-      projects: [],       
-
-      
-      sidebarProject: null,
-      saveTimeout: null,
-
-      users: [],
-      selectedUserId: '',
-
-      showCreateModal: false,
-      newProjectUsers: [],
+    return {        
+      projects: [],
+      sidebarProject: null,  
 
       popupMessage: '',
       popupType: 'success',
-      showPopup: false,
-
-      showDeleteDialog: false,
-      projectToDelete: null,
+      showPopup: false,      
+      
 
       mouseX: '50%',
       mouseY: '50%',
@@ -258,8 +149,8 @@ export default {
   },
 
   components:{
-    Popup,
-    ConfirmationDialog
+    Popup
+    
   },
 
   computed: {
@@ -287,7 +178,7 @@ export default {
 
   mounted() {
     this.loadProjects()
-    this.loadUsers()
+    
   },
 
   
@@ -295,169 +186,36 @@ export default {
   methods: {
     /////////////////////////////////////////////////////////////////////////////////////
     async loadProjects() {
-
-      console.log('Cargando proyectos...')
       const token = localStorage.getItem('auth_token')
+
       if (!token) {
-        console.log("No hay auth token")
-        console.error('No auth token found')
         this.$router.push('/login')
         return
       }
-      const res = await fetch(`${API_URL}/shared-projects`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-      })
-
-      this.projects = await res.json()
-    },
-////////////////////////////////////////////////////////////////////////////////////////////
-    async createProject() {
-
-      if (this.$route.path === '/shared-projects') {
-        this.$router.push('/projects')
-        return
-      }
 
       try {
+        const response = await fetch(`${API_URL}/shared-projects`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
 
-        console.log('CREANDO PROYECTO')
+        if (!response.ok) {
+          throw new Error('No se pudieron cargar los proyectos compartidos')
+        }
 
-        const res = await fetch(`${API_URL}/projects`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization:
-                `Bearer ${localStorage.getItem('auth_token')}`,
-            },
+        this.projects = await response.json()
+      } catch (error) {
+        console.error('Error cargando proyectos compartidos:', error)
 
-            body: JSON.stringify({
-              name: this.name,
-              description: this.description,
-            }),
-           
-          }
+        this.showPopupMessage(
+          'No se pudieron cargar los proyectos compartidos',
+          'error'
         )
-         console.log('BODY ENVIADO:', {
-              name: this.name,
-              description: this.description,
-            })
-
-        if (!res.ok) {
-          const errorText = await res.text()
-          console.error('ERROR BACKEND:', errorText)
-          throw new Error('Error creando proyecto')
-        }
-
-        const project = await res.json();
-
-        console.log(project)
-
-        for (const user of this.newProjectUsers) {
-
-          await fetch(`${API_URL}/projects/${project.id_project}/users`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization:
-                  `Bearer ${localStorage.getItem('auth_token')}`,
-              },
-
-              body: JSON.stringify({
-                user_id: user.id_user,
-                role: 'member',
-              }),
-            }
-          )
-        }
-
-        this.closeCreateModal()
-        this.loadProjects()
-
-      } catch (error) {
-        console.error(error)
       }
     },
-////////////////////////////////////////////////////////////////////////////////////////////
-    async deleteProject(id) {
-      this.projectToDelete = id
-      this.showDeleteDialog = true
-
-    },
 
 
-    confirmDelete() {
-      this.showDeleteDialog = false
-      this.deleteProjectConfirmed()
-
-    },
-
-    cancelDelete() {
-      this.showDeleteDialog = false
-      this.projectToDelete = null
-
-    },
-
-///////////////////////////////////////////////////////////////////////////////////////////
-    async deleteProjectConfirmed() {
-
-      try {
-
-          const response = await fetch(
-
-              `${API_URL}/projects/${this.projectToDelete}`,
-
-              {
-
-                  method: 'DELETE',
-
-                  headers: {
-
-                      Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-                      Accept: 'application/json'
-
-                  }
-
-              }
-
-          )
-
-          if (!response.ok) {
-
-              const error = await response.json()
-
-              throw new Error(
-                  error.message || 'No autorizado'
-              )
-
-          }
-
-          await this.loadProjects()
-
-          this.sidebarProject = null
-
-          this.showPopupMessage(
-              'Proyecto eliminado correctamente',
-              'success'
-          )
-
-      } catch (error) {
-
-          console.error(error)
-
-          this.showPopupMessage(
-              error.message,
-              'error'
-          )
-
-      }
-
-      this.projectToDelete = null
-
-    },
 
 //////////////////////////////////////////////////////////////////////////////////////////// 
     openSidebar(project) {
@@ -467,194 +225,8 @@ export default {
     closeSidebar() {
       this.sidebarProject = null
     },
-    debouncedSaveProject() {
-    clearTimeout(this.saveTimeout)
-    this.saveTimeout = setTimeout(() => {
-      this.autoSaveProject()
-    }, 700)
-},
-///////////////////////////////////////////////////////////////////////
-    async autoSaveProject() {
-      try {
-        await fetch(`${API_URL}/projects/${this.sidebarProject.id_project}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-          },
+    
 
-          body: JSON.stringify({
-            name: this.sidebarProject.name,
-            description: this.sidebarProject.description,
-          }),
-        })
-
-        const index = this.projects.findIndex(
-          p => p.id_project === this.sidebarProject.id_project
-        )
-
-        if (index !== -1) {
-          this.projects[index] = {
-            ...this.sidebarProject
-          }
-        }
-
-      } catch (error) {
-        console.error('Error autoguardando proyecto:', error)
-      }
-    },
-/////////////////////////////////////////////////////////////////////////////
-      async loadUsers() {
-        const res = await fetch(`${API_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-
-      })
-      this.users = await res.json()
-    },
-/////////////////////////////////////////////////////////////////////////////
-      closeCreateModal() {
-        this.showCreateModal = false
-        this.name = ''
-        this.description = ''
-        this.newProjectUsers = []
-        this.selectedUserId = ''
-      },
-
-      addUserToNewProject() {
-
-        if (!this.selectedUserId) return
-
-        const user = this.users.find(
-          u => u.id_user == this.selectedUserId
-        )
-
-        const exists = this.newProjectUsers.some(
-          u => u.id_user === user.id_user
-        )
-
-        if (!exists) {
-          this.newProjectUsers.push(user)
-        }
-
-        this.selectedUserId = ''
-      },
-
-      removeUserFromNewProject(userId) {
-        this.newProjectUsers =
-          this.newProjectUsers.filter(
-            u => u.id_user !== userId
-          )
-      },
-
-/////////////////////////////////////////////////////////////////////////////
-      async addUserToProject() {
-
-        if (!this.selectedUserId) return
-
-        try {
-
-          const response = await fetch(`${API_URL}/projects/${this.sidebarProject.id_project}/users`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-              },
-
-              body: JSON.stringify({
-                user_id: this.selectedUserId,
-                role: 'member'
-              }),
-            }
-          )
-
-          if (!response.ok) {
-
-            const error = await response.json()
-
-            this.showPopupMessage(error.message, "error")
-
-            return
-          }
-
-          await this.loadProjects()
-
-          this.sidebarProject = this.projects.find(
-            p => p.id_project === this.sidebarProject.id_project
-          )
-
-          this.selectedUserId = ''
-
-        } catch (error) {
-
-          console.error(error)
-
-          this.showPopupMessage(
-            "Error inesperado",
-            "error"
-          )
-        }
-      }, 
-///////////////////////////////////////////////////////////////
-    async removeUserFromProject(userId) {
-      try {
-
-        const response = await fetch(`${API_URL}/projects/${this.sidebarProject.id_project}/users/${userId}`,
-          {
-            method: 'DELETE',
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-            },
-          }
-        )
-
-        if (!response.ok) {
-
-          const error = await response.json()
-
-          this.showPopupMessage(
-            error.message,
-            "error"
-          )
-
-          return
-        }
-
-        this.sidebarProject.users =
-          this.sidebarProject.users.filter(
-            u => u.id_user !== userId
-          )
-
-      } catch (error) {
-
-        console.error(error)
-
-        this.showPopupMessage(
-          "Error inesperado",
-          "error"
-        )
-      }
-    },
-/////////////////////////////////////////////////////////////////////////////
-    async changeRole(userId, event) {
-      await fetch(`${API_URL}/projects/${this.sidebarProject.id_project}/users/${userId}/role`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-
-          body: JSON.stringify({
-            role: event.target.value
-          }),
-        }
-      )
-
-      this.loadProjects()
-    },
 ////////////////////////////////////////////////////////////////////////////
     formatDate(date) {
 
@@ -754,20 +326,7 @@ button {
   color: white;
   font-size: 50px;
 }
-/* BOTÓN CREAR */
-.create-project-btn {
-  background: #FE9F5B;
-  font-family: Poppins;
-  color: white !important; 
-  padding: 12px 18px;
-  border-radius: 10px;
-  
-  
-}
 
-.create-project-btn:hover {
-  background: #f1873c;
-}
 
 
 
@@ -909,43 +468,9 @@ li:hover .project-description, li:hover .project-users, li:hover .project-users-
 }
 
 
-/* BOTONES DENTRO DE CARDS */
-li button {
-  position: absolute;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 14px;
-  padding: 5px;
-  transition: 0.2s;  
-  top: 10px;
-  right: 10px;
-  color: #ef4444;
-  background-color: #d2a2a2;
-}
-
-li button:hover {
-  transform: scale(1.2);
-  color: #dc2626;
-  background-color: #dc2626;
-}
 
 
-/* INPUTS EN EDICIÓN */
-li input {
-  margin-bottom: 5px;
-  background: white;
-}
 
-/* BOTÓN GUARDAR */
-li button:first-child {
-  background-color: none;
-}
-
-li button:first-child:hover {
-  background-color: none;
-}
 
 /* ========================= */
 /* OVERLAY */
@@ -1023,15 +548,7 @@ li button:first-child:hover {
   color: #0f172a;
 }
 
-/* DESCRIPCIÓN */
 
-.sidebar-description {
-  color: #475569;
-  line-height: 1.7;
-  margin-bottom: 35px;
-  white-space: pre-wrap;
-  font-family: Poppins;
-}
 
 /* INFO */
 
@@ -1227,170 +744,6 @@ li button:first-child:hover {
   color: #64748b;
 }
 
-/* ADD USER */
-
-.add-user-section {
-  display: flex;  
-  margin-bottom: 20px;
-  padding: 0px 30px 0px 0px;
-  margin-right: -60px;
-  gap: 15px;
-  
-}
-
-.add-user-section select {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  background: #e2e8f0;
-}
-
-.add-user-section button {
-  background: #3b82f6;
-  color: white;
-  padding: 10px 16px;
-  border-radius: 10px;
-}
-
-.add-user-section button:hover {
-  background: #2563eb;
-}
-
-.remove-user{
-  position:absolute;
-  top: -20%;
-  left: 65%;
-}
-
-.remove-user-btn {
-  background: transparent !important;
-  border: none;
-  cursor: pointer;
-  color: #ef4444;
-  font-size: 12px;
-  padding: 0;
-  margin-left: auto;
-  transition: 0.2s;
-}
-
-.remove-user-btn:hover {
-  transform: scale(1.2);
-  color: #dc2626;
-}
-
-/* ========================= */
-/* CREAR PROYECTO */
-/* ========================= */
-
-
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.65);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-
-.create-modal {
-  width: 500px;
-  background: #d9d9d9;
-  border-radius: 12px;
-  padding: 35px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.create-modal h2, h3{
-  font-family: Poppins;
-}
-
-
-.create-modal input{
-  font-size: 30px;
-  padding: 5px;
-  margin-right: 0px;
-  margin-top: 5px;
-  font-family: Poppins;
-}
-
-.close-modal-btn {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background-color: rgb(190, 162, 162);
-}
-
-.create-description {
-  min-height: 120px;
-  resize: vertical;
-  border: none;
-  border-radius: 12px;
-  padding: 15px;
-  font-family: Poppins;
-}
-
-.create-users-section {
-  display: flex;
-  gap: 15px;
-  padding: 0px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.create-users-section select {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-.create-users-section button{
-  background-color: #FE9F5B;
-  color: white;
-  font-family: Poppins;
-  border-radius: 12px;
-}
-
-.selected-users {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 0px;
-  font-family: Poppins;
-  font-weight: bold;
-}
-
-.selected-user {
-  background: #c9c9c9;
-  padding-left: 15px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-}
-
-.selected-user button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.confirm-create-btn {
-  background: #16a34a;
-  color: white;
-  margin: 10px 150px;
-  font-family: Poppins;
-}
-
-.confirm-create-btn:hover {
-  background: #15803d;
-}
 
 
 
@@ -1416,10 +769,6 @@ li button:first-child:hover {
     font-size: 28px;
     line-height: 1.2;
     margin: 0;
-  }
-
-  .create-project-btn {
-    width: 100%;
   }
 
   ul {
@@ -1473,31 +822,6 @@ li button:first-child:hover {
     min-width: unset;
   }
 
-  .remove-user{
-    position:absolute;
-    top: -20%;
-    left: 80%;
-  }
-
-  .add-user-section {
-    flex-direction: column;
-    margin-right: 0;
-    padding-right: 0;
-  }
-
-  .add-user-section button {
-    width: 100%;
-  }
-
-  .create-modal {
-    width: 95%;
-    padding: 20px;
-  }
-
-  .confirm-create-btn {
-    margin: 0;
-    width: 100%;
-  }
 
   .open-project-btn {
     position: static;

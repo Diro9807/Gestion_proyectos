@@ -366,8 +366,7 @@ export default {
 
     ///////////////////////////////////////////////////////////////
     async loadTasks() {
-
-      console.log('Cargando tareas...')
+     
 
       const token = localStorage.getItem('auth_token')
 
@@ -402,7 +401,7 @@ export default {
 //////////////////////////////////////////////////////////////
     async createTask() {
 
-      console.log('Nueva task:', this.newTask)
+      
 
       try {
 
@@ -801,42 +800,6 @@ button {
  
 }
 
-
-
-
-/* INPUT CREAR */
-.create-task {
-  margin-bottom: 20px;
-}
-
-.create-task input {
-  padding: 10px;
-  margin-right: 10px;
-  border-radius: 6px;
-  border: none;
-  outline: none;
-  background: white;
-  color: black;
-}
-
-.create-task input::placeholder {
-  color: #94a3b8;
-}
-
-.create-task input:focus {
-  background: rgb(177, 198, 209);
-}
-
-/* BOTÓN CREAR */
-.create-task button {
-  background-color: #ef7e15;
-  color: white;
- 
-}
-
-.create-task button:hover {
-  background-color: #0f4fcc;
-}
 .complet-grid{
   background-color: #eaeaea;
   border-radius: 12px;
@@ -1027,25 +990,7 @@ li button {
   transition: 0.2s;
 }
 
-/* EDITAR */
-li button:nth-of-type(1) {
-  color: #f59e0b;
-}
 
-li button:nth-of-type(1):hover {
-  transform: scale(1.2);
-  color: #d97706;
-}
-
-/* ELIMINAR */
-li button:nth-of-type(2) {
-  color: #ef4444;
-}
-
-li button:nth-of-type(2):hover {
-  transform: scale(1.2);
-  color: #dc2626;
-}
 
 /* MODO EDICIÓN */
 li input {  
@@ -1055,23 +1000,7 @@ li input {
   border: none;
 }
 
-/* BOTÓN GUARDAR */
-li button:first-child {
-  color: #22c55e;
-}
 
-li button:first-child:hover {
-  color: #16a34a;
-}
-
-/* BOTÓN CANCELAR */
-li button:last-child {
-  color: #64748b;
-}
-
-li button:last-child:hover {
-  color: #475569;
-}
 /* ========================= */
 /* ESTADOS SELECT */
 /* ========================= */

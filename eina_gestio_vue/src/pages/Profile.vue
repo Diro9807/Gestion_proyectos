@@ -38,7 +38,7 @@
           <input
             v-model="form.name"
             type="text"
-            maxlength="25"
+            maxlength="20"
           />
 
         </div>
@@ -77,9 +77,10 @@
         <button
           class="save-btn"
           @click="updateProfile"
+          :disabled="saving"
         >
-          Guardar cambios
-        </button>
+          {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
 
       </div>
 
@@ -113,7 +114,7 @@ export default {
     return {
 
       user: JSON.parse(
-        localStorage.getItem('auth_user')
+        localStorage.getItem('auth_user') || '{}'
       ),
 
       form: {
@@ -128,18 +129,29 @@ export default {
       showPopup: false,
       popupMessage: '',
       popupType: 'success',
-      
+      saving: false,
     }
   },
 
   mounted() {
 
-    this.form.name = this.user.name
+    this.form.name = this.user.name || ''
   },
 
   methods: {
 
     async updateProfile() {
+
+      if (this.saving) return
+
+      const token = localStorage.getItem('auth_token')
+
+      if (!token) {
+          this.$router.push('/login')
+          return
+      }
+
+      this.saving = true
 
       try {
 
@@ -148,8 +160,7 @@ export default {
 
             headers: {
               'Content-Type': 'application/json',
-              Authorization:
-                `Bearer ${localStorage.getItem('auth_token')}`
+              Authorization: `Bearer ${token}`
             },
 
             body: JSON.stringify(this.form)
@@ -207,11 +218,15 @@ export default {
             'error'
           )
 
-        }
+        }        
+
+      } finally {
+
+        this.saving = false
 
       }
     },
-
+///////////////////////////////////////////////////////////////////////////////
     showPopupMessage(message, type = 'success') {
 
       this.popupMessage = message

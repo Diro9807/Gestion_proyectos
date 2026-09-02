@@ -315,6 +315,16 @@ export default {
     }
 
     },
+    //Vuelve a la primera página
+    watch: {
+        search() {
+            this.currentPage = 1
+        },
+
+        roleFilter() {
+            this.currentPage = 1
+        }
+    },
 
   methods: {
 
@@ -342,6 +352,11 @@ export default {
         } catch (error) {
 
             console.error(error)
+
+            this.showPopupMessage(
+                'No se pudieron cargar los usuarios.',
+                'error'
+            )
 
         }
 
@@ -398,6 +413,11 @@ export default {
 
             event.target.value = user.roles_id
 
+            this.showPopupMessage(
+                'Error al actualizar el rol.',
+                'error'
+            )
+
         }
 
     },
@@ -425,10 +445,12 @@ export default {
 
                 this.showDeleteDialog = false
 
-                
+                this.showPopupMessage(
+                    data.message || 'No se pudo eliminar el usuario.',
+                    'error'
+                )
 
                 return
-
             }
 
             const deletedName = this.selectedUser.name
@@ -467,22 +489,7 @@ export default {
         }
 
     },
-
-    fixCurrentPage() {
-
-        if (this.currentPage > this.totalPages) {
-
-            this.currentPage = this.totalPages || 1
-
-        }
-
-        if (this.currentPage < 1) {
-
-            this.currentPage = 1
-
-        }
-
-    },
+ 
 
     openDeleteDialog(user){
 
@@ -702,7 +709,7 @@ tbody tr:hover{
 
 /* BOTONES */
 
-.edit-btn,
+
 .delete-btn{
 
     border:none;
@@ -716,10 +723,7 @@ tbody tr:hover{
     transition:.2s;
 }
 
-.edit-btn:hover{
 
-    transform:scale(1.2);
-}
 
 .delete-btn:hover{
 

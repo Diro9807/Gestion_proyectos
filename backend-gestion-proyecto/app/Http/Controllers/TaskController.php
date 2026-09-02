@@ -88,7 +88,7 @@ class TaskController extends Controller{
 
          $request->validate([
             'user_id' => 'nullable|exists:users,id_user',
-            'start_date' => 'nullable|date|after_or_equal:today',
+            'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'due_date' => 'nullable|date|after_or_equal:end_date'
         ]);

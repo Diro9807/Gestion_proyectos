@@ -308,7 +308,7 @@ export default {
       this.currentUser = JSON.parse(storedUser)
     }
 
-    console.log('CURRENT USER:', this.currentUser)
+    
 
     this.loadProjects()
     this.loadUsers()
@@ -338,12 +338,11 @@ export default {
     async loadProjects() {
 
       try{
-        console.log('Cargando proyectos...')
+        
         const token = localStorage.getItem('auth_token')
           if (!token) {
 
-            console.log("No hay auth token")
-            console.error('No auth token found')
+            
             this.$router.push('/login')
 
             return
@@ -368,7 +367,7 @@ export default {
 
       try {
 
-        console.log('CREANDO PROYECTO')
+        
 
         const res = await fetch( `${API_URL}/projects`,
           {
@@ -386,10 +385,7 @@ export default {
            
           }
         )
-         console.log('BODY ENVIADO:', {
-              name: this.name,
-              description: this.description,
-            })
+         
 
         if (!res.ok) {
           const errorText = await res.text()
@@ -399,8 +395,7 @@ export default {
 
         const project = await res.json();
 
-        console.log(project)
-        console.log('USUARIOS AÑADIDOS:', this.newProjectUsers)
+        
 
         for (const user of this.newProjectUsers.filter(
               u => !u.fixed
@@ -650,7 +645,7 @@ export default {
 
           const data = await response.json()
 
-          console.log(data)
+          
 
           if (!response.ok) {
             this.showPopupMessage(
@@ -679,7 +674,7 @@ export default {
 
           console.error(error)
 
-          this.showPopupMessage('Error inesperado')
+          this.showPopupMessage('Error inesperado','error')
         }
       },
 ///////////////////////////////////////////////////////////////
