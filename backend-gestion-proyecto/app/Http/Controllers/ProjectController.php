@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 use App\Models\Project;
 use Illuminate\Http\Request;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Task;
 
@@ -51,30 +50,35 @@ class ProjectController extends Controller
 
     public function destroy($id){
 
-    $project = Project::findOrFail($id);
+        $project = Project::findOrFail($id);
 
-    if ($response = $this->checkProjectOwner($project)) {
-        return $response;
+        if ($response = $this->checkProjectOwner($project)) {
+            return $response;
+        }
+
+        // BORRAR TASKS DEL PROYECTO
+        Task::where('project_task_id', $project->id_project)
+            ->delete();
+
+        // BORRAR RELACIONES CON USUARIOS
+        $project->users()->detach();
+
+        // BORRAR PROYECTO
+        $project->delete();
+
+        return response()->json([
+            'message' => 'Proyecto eliminado'
+        ]);
     }
-
-    // BORRAR TASKS DEL PROYECTO
-    Task::where('project_task_id', $project->id_project)
-        ->delete();
-
-    // BORRAR RELACIONES CON USUARIOS
-    $project->users()->detach();
-
-    // BORRAR PROYECTO
-    $project->delete();
-
-    return response()->json([
-        'message' => 'Proyecto eliminado'
-    ]);
-}
 
     public function update(Request $request, $id){
 
         $project = Project::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string'
+        ]);
 
         if ($response = $this->checkProjectOwner($project)) {
             return $response;
@@ -90,51 +94,38 @@ class ProjectController extends Controller
 
     public function addUser(Request $request, $id){
 
-        try {
+        $project = Project::findOrFail($id);
 
-            $project = Project::findOrFail($id);
-
-            if ($response = $this->checkProjectOwner($project)) {
-                return $response;
-            }
-
-            $request->validate([
-                'user_id' => 'required|exists:users,id_user',
-                'role' => 'nullable|in:owner,admin,member'
-            ]);
-
-            $alreadyExists = $project->users()
-                ->where('users.id_user', $request->user_id)
-                ->exists();
-
-            if ($alreadyExists) {
-
-                return response()->json([
-                    'message' => 'El usuario ya pertenece al proyecto'
-                ], 409);
-            }
-
-            $project->users()->attach(
-                $request->user_id,
-                [
-                    'role' => $request->role ?? 'member'
-                ]
-            );
-
-            return response()->json([
-                'message' => 'Usuario añadido'
-            ]);
-
-        } catch (\Exception $e) {
-
-            return response()->json([
-                'error' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile()
-            ], 500);
+        if ($response = $this->checkProjectOwner($project)) {
+            return $response;
         }
-    }
 
+        $request->validate([
+            'user_id' => 'required|exists:users,id_user',
+            'role' => 'nullable|in:admin,member'
+        ]);
+
+        $alreadyExists = $project->users()
+            ->where('users.id_user', $request->user_id)
+            ->exists();
+
+        if ($alreadyExists) {
+            return response()->json([
+                'message' => 'El usuario ya pertenece al proyecto'
+            ], 409);
+        }
+
+        $project->users()->attach(
+            $request->user_id,
+            [
+                'role' => $request->role ?? 'member'
+            ]
+        );
+
+        return response()->json([
+            'message' => 'Usuario añadido'
+        ]);
+    }
     public function removeUser($projectId, $userId){
 
         $project = Project::findOrFail($projectId);
@@ -149,24 +140,28 @@ class ProjectController extends Controller
             return $response;
         }
 
-        $project->users()->detach($userId);
-
         $targetUser = $project->users()
             ->where('users.id_user', $userId)
             ->first();
 
-        if ($targetUser?->pivot?->role === 'owner') {
+        if (!$targetUser) {
+            return response()->json([
+                'message' => 'El usuario no pertenece al proyecto'
+            ], 404);
+        }
 
+        if ($targetUser->pivot->role === 'owner') {
             return response()->json([
                 'message' => 'No puedes eliminar el owner'
             ], 403);
         }
 
+        $project->users()->detach($userId);
+
         return response()->json([
             'message' => 'Usuario eliminado'
         ]);
     }
-
 
 
     private function userRole(Project $project){
@@ -192,7 +187,7 @@ class ProjectController extends Controller
         $project = Project::findOrFail($projectId);
 
         $request->validate([
-            'role' => 'required|in:owner,admin,member'
+            'role' => 'required|in:admin,member'
         ]);
 
         if ($response = $this->checkProjectOwner($project)) {
@@ -203,8 +198,13 @@ class ProjectController extends Controller
             ->where('users.id_user', $userId)
             ->first();
 
-        if ($targetUser?->pivot?->role === 'owner') {
+        if (!$targetUser) {
+            return response()->json([
+                'message' => 'El usuario no pertenece al proyecto'
+            ], 404);
+        }
 
+        if ($targetUser->pivot->role === 'owner') {
             return response()->json([
                 'message' => 'No puedes modificar el owner'
             ], 403);

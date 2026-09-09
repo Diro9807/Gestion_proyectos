@@ -98,30 +98,26 @@
 <script>
 
 export default {
-  name: 'NavbarComponent',
+  name: 'NavbarComponent',    
 
-    created() {
-
+  created() {
     window.addEventListener('auth-changed', this.loadUser)
-
     this.loadUser()
   },
 
   data() {
-    
     return {
-      user: null,   
-      mobileMenuOpen: false,   
+      user: null,
+      mobileMenuOpen: false,
     }
   },
 
   mounted() {
-    this.loadUser()
-
     window.addEventListener('storage', this.loadUser)
   },
 
   beforeUnmount() {
+    window.removeEventListener('auth-changed', this.loadUser)
     window.removeEventListener('storage', this.loadUser)
   },
 
@@ -300,7 +296,7 @@ export default {
     height: 34px;
   }
 
-  .nav-btn,
+  .links-btn,
   .logout-btn {
     padding: 8px 12px;
     font-size: 13px;

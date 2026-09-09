@@ -79,8 +79,7 @@ class AuthController extends Controller
                 'unique:users,name,' . $user->id_user . ',id_user'
             ],
 
-            'password' =>
-                'nullable|min:6|confirmed'
+            'password' => 'nullable|string|min:6|max:15|confirmed'
         ]);
 
         $user->name = $request->name;

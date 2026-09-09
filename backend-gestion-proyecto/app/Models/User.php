@@ -21,6 +21,13 @@ class User extends Authenticatable
         'password',
         'roles_id'
     ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+
     public function getAuthIdentifierName(){
 
         return 'id_user';
