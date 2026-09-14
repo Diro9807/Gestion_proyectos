@@ -1,27 +1,23 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-
 class AuthController extends Controller
 {
-
     public function index()
-        {
-            $users = User::all();
-            return response()->json($users);
-        }
+    {
+        $users = User::all();
 
+        return response()->json($users);
+    }
 
-    public function login(Request $request){
-
+    public function login(Request $request)
+    {
         $request->validate([
-
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
@@ -29,7 +25,6 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-
             return response()->json([
                 'message' => 'Credenciales inválidas'
             ], 401);
@@ -44,16 +39,24 @@ class AuthController extends Controller
         ]);
     }
 
-    public function register(Request $request){
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
 
+        return response()->json([
+            'message' => 'Sesión cerrada correctamente'
+        ]);
+    }
+
+    public function register(Request $request)
+    {
         $request->validate([
             'name' => 'required|string|max:20|unique:users,name',
 
             'email' => 'required|email|unique:users,email',
 
-            'password' => 'required|string|min:6|max:15|confirmed',
+            'password' => 'required|string|min:6|max:50|confirmed',
         ]);
-
 
         $user = new User();
         $user->name = $request['name'];
@@ -63,40 +66,37 @@ class AuthController extends Controller
 
         $user->save();
 
-        return response()->json(['message' => 'Usuario creado correctamente', 'user' => $user]);
+        return response()->json([
+            'message' => 'Usuario creado correctamente',
+            'user' => $user
+        ]);
     }
 
-    public function updateProfile(Request $request){
-
+    public function updateProfile(Request $request)
+    {
         $user = auth()->user();
 
         $request->validate([
-
             'name' => [
                 'required',
                 'string',
-                'max:50',
+                'max:20',
                 'unique:users,name,' . $user->id_user . ',id_user'
             ],
 
-            'password' => 'nullable|string|min:6|max:15|confirmed'
+            'password' => 'nullable|string|min:6|max:50|confirmed'
         ]);
 
         $user->name = $request->name;
 
         if ($request->password) {
-
-            $user->password = Hash::make(
-                $request->password
-            );
+            $user->password = Hash::make($request->password);
         }
 
         $user->save();
 
         return response()->json([
-
             'message' => 'Perfil actualizado',
-
             'user' => $user
         ]);
     }

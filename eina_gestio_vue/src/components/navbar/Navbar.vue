@@ -97,8 +97,11 @@
 
 <script>
 
+import { API_URL } from '../../config'
+
 export default {
-  name: 'NavbarComponent',    
+
+  name: 'NavbarComponent',
 
   created() {
     window.addEventListener('auth-changed', this.loadUser)
@@ -122,6 +125,7 @@ export default {
   },
 
   computed: {
+
     userName() {
       return this.user?.name || 'Usuario'
     },
@@ -133,11 +137,12 @@ export default {
     isAdmin() {
       return this.user?.roles_id === 1
     }
+
   },
 
   methods: {
-    loadUser() {
 
+    loadUser() {
       const user = localStorage.getItem('auth_user')
 
       this.user = user
@@ -145,19 +150,38 @@ export default {
         : null
     },
 
-    logout() {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('auth_user')
+    async logout() {
+      const token = localStorage.getItem('auth_token')
 
-      window.dispatchEvent(new Event('auth-changed'))
+      try {
+        if (token) {
+          const response = await fetch(`${API_URL}/logout`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json'
+            }
+          })
 
-      this.$router.push('/login')
-    },
+          if (!response.ok) {
+            console.error('El servidor no pudo cerrar la sesión correctamente.')
+          }
+        }
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error)
+      } finally {
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('auth_user')
 
+        window.dispatchEvent(new Event('auth-changed'))
+
+        this.$router.push('/login')
+      }
+    }
 
   },
-}
 
+}
 </script>
 
 <style scoped>

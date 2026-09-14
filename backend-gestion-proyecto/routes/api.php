@@ -20,6 +20,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // RUTAS USUARIOS
     Route::get('/users', [AuthController::class, 'index']);
 
+    // LOG-OUT
+    Route::post('/logout', [AuthController::class, 'logout']);
+
     // RUTAS ROLES
     Route::get('/rol', [RolController::class, 'index']);
     Route::put('/projects/{project}/users/{user}/role', [ProjectController::class, 'changeRole']);
