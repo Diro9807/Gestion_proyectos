@@ -4,6 +4,19 @@ Aplicación web para crear y organizar proyectos, gestionar tareas y colaborar c
 
 > **Estado:** proyecto en desarrollo.
 
+## Capturas de pantalla
+
+Las siguientes imágenes muestran algunas de las principales pantallas de la aplicación.
+
+| Inicio de sesión | Mis proyectos |
+|---|---|
+| ![Inicio de sesión](docs/screenshots/login.jpg) | ![Mis proyectos](docs/screenshots/projects.jpg) |
+
+| Gestión de tareas | Administración |
+|---|---|
+| ![Gestión de tareas](docs/screenshots/project-detail.jpg) | ![Administración](docs/screenshots/admin-panel.jpg) |
+
+
 ## Funcionalidades
 
 - Registro, inicio y cierre de sesión.
