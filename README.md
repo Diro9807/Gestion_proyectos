@@ -6,16 +6,23 @@ Aplicación web para crear y organizar proyectos, gestionar tareas y colaborar c
 
 ## Capturas de pantalla
 
-Las siguientes imágenes muestran algunas de las principales pantallas de la aplicación.
+A continuación se muestran las principales vistas de la aplicación:
 
-| Inicio de sesión | Mis proyectos |
+| Inicio de sesión | Registro |
 |---|---|
-| ![Inicio de sesión](docs/screenshots/login.jpg) | ![Mis proyectos](docs/screenshots/projects.jpg) |
+| ![Inicio de sesión](docs/screenshots/login.png.png) | ![Registro](docs/screenshots/register.png.png) |
 
-| Gestión de tareas | Administración |
+| Mis proyectos | Detalle del proyecto |
 |---|---|
-| ![Gestión de tareas](docs/screenshots/project-detail.jpg) | ![Administración](docs/screenshots/admin-panel.jpg) |
+| ![Mis proyectos](docs/screenshots/projects.png.png) | ![Detalle del proyecto](docs/screenshots/projects2.png.png) |
 
+| Gestión de tareas | Proyectos compartidos |
+|---|---|
+| ![Gestión de tareas](docs/screenshots/task.png.png) | ![Proyectos compartidos](docs/screenshots/shared.png.png) |
+
+| Perfil de usuario | Administración |
+|---|---|
+| ![Perfil de usuario](docs/screenshots/profile.png.png) | ![Panel de administración](docs/screenshots/admin-panel.png.png) |
 
 ## Funcionalidades
 
